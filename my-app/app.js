@@ -2,7 +2,7 @@ import dotenv from 'dotenv'
 import express from 'express'
 import mongoose from 'mongoose'
 import morgan from 'morgan'
-import { User } from "./models/userModel";
+import { User } from "./models/userModel.js";
 
 
 dotenv.config()
@@ -28,7 +28,22 @@ if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'))
   console.log("morgan enable in dev")
 }
+ const router = express.Router()
+
+const myroute = router.post('/users', async (req, res) => {
+  const {name , email , password } = req.body;
+  console.log(name , email , password)
+  res.json(
+    {
+       message:" successfuly make user "},
+      name  , email , password 
+   )
+});
+app.use(router, myroute)
+
 app.get('/', (req, res) => {
+  const {name } = req.body;
+  console.log(name)
   res.send("Hello World")
 })
 
@@ -43,30 +58,27 @@ app.get('/', (req, res) => {
 // make fun use async await only in create new no need 
 // use try catch 
 
-const createUsers = async () => {
-  try {
-    // // First method: Using new and save()
-    // const userNew = new User({ 
-    //   name: "Ali",
-    //   age: 25
-    // });
-    // await userNew.save();
-    // console.log('User created using save():', userNew);
+// const createUsers = async () => {
+//   try {
+//     // // First method: Using new and save()
+//     // const userNew = new User({ 
+//     //   name: "Ali",
+//     //   age: 25
+//     // });
+//     // await userNew.save();
+//     // console.log('User created using save():', userNew);
 
-    // Second method: Using create()
-    const userNew_ = await User.create({ 
-      name: "Ahmed",
-      age: 30
-    });
-    console.log('User created using create():', userNew_);
+//     // Second method: Using create()
+   
+//     console.log('User created using create():', userNew_);
 
-  } catch (error) {
-    console.error('Error creating users:', error);
-  }
-};
+//   } catch (error) {
+//     console.error('Error creating users:', error);
+//   }
+// };
 
 // Execute the function
-createUsers();
+// createUsers();
 
 
 
