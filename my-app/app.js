@@ -35,10 +35,10 @@ const myroute = router.post('/users', async (req, res) => {
   console.log(name , email , password)
   res.json(
     {
-       message:" successfuly make user "},
-      name  , email , password 
+       message:" successfuly make user ",  name  , email , password }
    )
 });
+
 app.use(router, myroute)
 
 app.get('/', (req, res) => {
