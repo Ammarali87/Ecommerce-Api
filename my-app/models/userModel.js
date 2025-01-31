@@ -10,7 +10,12 @@ const userSchema = new Schema({
     required: [true, 'Name is required'],
     trim: true
   },
-  email: {
+  slug:{ 
+    type:String , 
+    lowercase:true, 
+    trim:true
+  }, 
+   email: {
     type: String,
     required: [true, 'Email is required'],
     unique: true,
@@ -23,8 +28,7 @@ const userSchema = new Schema({
       message: 'Please enter a valid email'
     }
   }
-  
-});
+} ,{timestamps:true} );
 
 
 // Hash password before saving
