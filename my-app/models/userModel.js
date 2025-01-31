@@ -1,4 +1,8 @@
 import { Schema, model } from "mongoose";
+//  bcrypt.compare
+//  bcrypt.hash
+//  userSchema.methods.compPassword
+//  userSchema.pre
 
 const userSchema = new Schema({
   name: {
@@ -6,11 +10,6 @@ const userSchema = new Schema({
     required: [true, 'Name is required'],
     trim: true
   },
-  // age:{
-  //   type: Number,
-  //   required: [true, 'Age is required'],
-  // }
-  
   email: {
     type: String,
     required: [true, 'Email is required'],
@@ -24,6 +23,22 @@ const userSchema = new Schema({
       message: 'Please enter a valid email'
     }
   }
+  
 });
+
+
+// Hash password before saving
+userSchema.pre('save', async function (next) {
+  if (!this.isModified('password')) return next();
+  this.password = await bcrypt.hash(this.password, 12);
+  next();
+});
+
+// !this.isModified prevent reHash when update email and name
+// remember async function in-schema
+// Compare passwords
+userSchema.methods.comparePassword = async function (enteredPassword) {
+  return await bcrypt.compare(enteredPassword, this.password);
+};     
 
 export const User = model('User', userSchema);
