@@ -4,6 +4,10 @@ import { connect } from './config/mongo.js'
 import amar  from './routes/amar.js';
 import { login, logout, signup } from './controller/authController.js';
 const app = express()
+// v1,v2 Backward Compatibility: 
+// all express is middileware  
+//  like auth routes use next()
+//  to go to other middileware 
 const router = express.Router()
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))

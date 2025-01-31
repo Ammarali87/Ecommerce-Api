@@ -14,10 +14,25 @@ export async function signup(req, res) {
 
     const token = signToken(newUser._id);
     res.status(201).json({ status: 'success', token, user: { id: newUser._id, name, email } });
-  } catch (err) {
+  } catch (err) {  
+    if (err.name === 'ValidationError') {
+      // Object.valuesExtract all error messages: 
+      // If multiple fields are invalid, it returns an array
+      const messages = Object.values(err.errors).map((er) => er.message);
+      return res.status(400).json({ status: 'fail', message: messages });
+    }
     res.status(400).json({ status: 'fail', message: err.message });
   }
 }
+
+// alert(error.response?.data?.message.join('\n') || 'Something went wrong');
+// in front  error .join('\n')?
+// Improves readability:multiple messages in string
+//  instead of a comma-separated list.
+
+
+
+
 
 // **Login**
 export async function login(req, res) {
@@ -29,8 +44,10 @@ export async function login(req, res) {
     }
 
     const user = await findOne({ email }).select('+password');
-    if (!user || // user not schema
-        !(await user.comparePassword(password))) {
+    if (!user ||  
+      // use !( await)
+      // bad  await User.crypt.comparePawword(enterPAssword)
+      !(await user.comparePassword(password))) {
       return res.status(401).json({ message: 'Incorrect email or password' });
     }
       // warning  if he put const toke first
