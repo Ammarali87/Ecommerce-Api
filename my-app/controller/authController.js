@@ -29,10 +29,13 @@ export async function login(req, res) {
     }
 
     const user = await findOne({ email }).select('+password');
-    if (!user || !(await user.comparePassword(password))) {
+    if (!user || // user not schema
+        !(await user.comparePassword(password))) {
       return res.status(401).json({ message: 'Incorrect email or password' });
     }
-
+      // warning  if he put const toke first
+      // the user will login this Bad 
+      // if to prevent login  if any error 
     const token = signToken(user._id);
     res.json({ status: 'success', token, user: { id: user._id, name: user.name, email } });
   } catch (err) {

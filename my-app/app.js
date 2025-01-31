@@ -2,6 +2,7 @@ import dotenv from 'dotenv'
 import express from 'express'
 import { connect } from './config/mongo.js'
 import amar  from './routes/amar.js';
+import { login, logout, signup } from './controller/authController.js';
 const app = express()
 const router = express.Router()
 app.use(express.json())
@@ -9,6 +10,9 @@ app.use(express.urlencoded({ extended: true }))
 dotenv.config()
 await connect()
 app.use(router, amar)
+app.use(router, login)
+app.use(router, logout)
+app.use(router, signup)
  
 
 
