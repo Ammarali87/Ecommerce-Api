@@ -17,7 +17,15 @@ app.use(router, amar)
 app.use(router, login)
 app.use(router, logout)
 app.use(router, signup)
- 
+app.get("/",category)
+
+const createCategory = ()=>{
+  const product =   new categoryModel({name:"phone"})
+ product.save()
+ .then((doc)=> res.json(doc))
+ .catch((err)=> res.json(err))
+}
+
 
 
 
