@@ -2,7 +2,7 @@ import dotenv from 'dotenv'
 import express from 'express'
 import { connect } from './config/mongo.js'
 import { User } from "./models/userModel.js";
-import { amar } from './routes/amar.js';
+import  amar from './routes/amar.js';
 const app = express()
 const router = express.Router()
 app.use(express.json())
