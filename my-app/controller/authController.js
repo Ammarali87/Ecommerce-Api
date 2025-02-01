@@ -1,5 +1,5 @@
-import { create, findOne } from '../models/userModel';
-import { sign } from 'jsonwebtoken';
+import {User} from '../models/userModel.js';
+import  sign  from 'jsonwebtoken';
 
 // Function to generate JWT
 const signToken = (id) => {
@@ -10,7 +10,7 @@ const signToken = (id) => {
 export async function signup(req, res) {
   try {
     const { name, email, password } = req.body;
-    const newUser = await create({ name, email, password });
+    const newUser = await User.create({ name, email, password });
 
     const token = signToken(newUser._id);
     res.status(201).json({ status: 'success', token, user: { id: newUser._id, name, email } });
@@ -43,7 +43,7 @@ export async function login(req, res) {
       return res.status(400).json({ message: 'Please provide email and password' });
     }
 
-    const user = await findOne({ email }).select('+password');
+    const user = await User.findOne({ email }).select('+password');
     if (!user ||  
       // use !( await)
       // bad  await User.crypt.comparePawword(enterPAssword)

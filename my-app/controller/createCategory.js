@@ -1,36 +1,41 @@
-import Category from './models/CategoryModel';
+import Category from '../models/categoryModel.js';
+import slugify from 'slugify';
 
-// addCategory
-const addCategory = async () => {
+
+// Add Category Function
+export const addCategory = async (req, res) => {
   try {
+    const { name } = req.body;
+
+    if (!name) {
+      return res.status(400).json({ status: 'fail', message: 'Category name is required' });
+    }
+
     const newCategory = new Category({
-      name: 'Technology',
-      description: 'This category contains tech-related products.',
+      name,
+      slug: slugify(name),  // Create a slug from the name
     });
 
     await newCategory.save();
-    console.log('Category Added:', newCategory);
-    res.status(200).json({status:"success",newCategory})
+    res.status(201).json({ status: 'success', newCategory });
   } catch (error) {
     console.log('Error adding category:', error);
+    res.status(500).json({ status: 'error', message: 'Error adding category' });
   }
 };
 
-addCategory();
 
 
-// getCategories
 
-const getCategories = async () => {
-    try {
-      const categories = await Category.find();
-      console.log('Categories:', categories);
-    res.status(200).json({status:"success",categories})
 
-    } catch (error) {
-      console.log('Error fetching categories:', error);
-    }
-  };
-  
-  getCategories();
-  
+
+// Get Categories Function
+export const getCategories = async (req, res) => {
+  try {
+    const categories = await Category.find();
+    res.status(200).json({ status: 'success', categories });
+  } catch (error) {
+    console.log('Error fetching categories:', error);
+    res.status(500).json({ status: 'error', message: 'Error fetching categories' });
+  }
+};

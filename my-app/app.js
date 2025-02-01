@@ -1,15 +1,27 @@
 import dotenv from 'dotenv'
 import express from 'express'
 import { connect } from './config/mongo.js'
-import { User } from "./models/userModel.js";
-import  amar from './routes/amar.js';
+import amar  from './routes/amar.js';
+import { login, logout, signup } from './controller/authController.js';
 const app = express()
+import { addCategory ,getCategories } from './controller/createCategory.js';
+// v1,v2 Backward Compatibility: 
+// all express is middileware  
+//  like auth routes use next()
+//  to go to other middileware 
 const router = express.Router()
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 dotenv.config()
 await connect()
+// app.use("/api", router)
+
 app.use(router, amar)
+app.use(router, login)
+app.use(router, logout)
+app.use(router, signup)
+app.use(cateR, addCategory)
+app.use(router, getCategories)
  
 
 
