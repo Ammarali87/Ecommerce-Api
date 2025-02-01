@@ -3,7 +3,7 @@ import { User } from "../models/userModel.js";
 
 const router = express.Router()
 
- router.post('/api/users', 
+ router.post('/api/amar', 
   async (req, res) => {
   const {name , email , password } = req.body;
   const newUser = await User.create({name,password,email})
@@ -16,4 +16,15 @@ const router = express.Router()
    )
 });
 
+
+
 export default router
+
+
+
+// router.get('/', (req, res) => {
+//   res.send("Donkey is hereee 🐴");
+// });
+
+
+

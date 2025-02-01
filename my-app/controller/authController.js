@@ -1,10 +1,9 @@
 import {User} from '../models/userModel.js';
-import { create, findOne } from '../models/userModel';
-import { sign } from 'jsonwebtoken';
+import jwt  from 'jsonwebtoken';
 
 // Function to generate JWT
 const signToken = (id) => {
-  return sign({ id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+  return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '1h' });
 };
 
 // **Signup**
@@ -41,6 +40,8 @@ export async function login(req, res) {
     const { email, password } = req.body;
 
     if (!email || !password) {
+      console.log("no email or password");
+      
       return res.status(400).json({ message: 'Please provide email and password' });
     }
 
@@ -49,7 +50,8 @@ export async function login(req, res) {
       // use !( await)
       // bad  await User.crypt.comparePawword(enterPAssword)
       !(await user.comparePassword(password))) {
-      return res.status(401).json({ message: 'Incorrect email or password' });
+        console.log("inCorrect email or password");
+        return res.status(401).json({ message: 'Incorrect email or password' });
     }
       // warning  if he put const toke first
       // the user will login this Bad 

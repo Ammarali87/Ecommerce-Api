@@ -1,81 +1,30 @@
-import dotenv from 'dotenv'
-import express from 'express'
-import { connect } from './config/mongo.js'
-import amar  from './routes/amar.js';
-import { login, logout, signup } from './controller/authController.js';
-const app = express()
-import { addCategory ,getCategories } from './controller/createCategory.js';
-// v1,v2 Backward Compatibility: 
-// all express is middileware  
-//  like auth routes use next()
-//  to go to other middileware 
-const router = express.Router()
-app.use(express.json())
-app.use(express.urlencoded({ extended: true }))
-dotenv.config()
-await connect()
-// app.use("/api", router)
+import dotenv from 'dotenv';
+import express from 'express';
+import { connect } from './config/mongo.js';
+import amarRoutes from './routes/amar.js';
+import authRoutes from './routes/auth.js';
 
-app.use(router, amar)
-app.use(router, login)
-app.use(router, logout)
-app.use(router, signup)
-app.use(router, addCategory)
-app.use(router, getCategories)
- 
+dotenv.config(); // 📌 يجب أن يكون في البداية قبل استخدام أي متغير بيئي
 
+const app = express();
 
+// Middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
+// الاتصال بقاعدة البيانات
+connect().then(() => console.log("MongoDB Connected")).catch(err => console.log(err));
 
+// استخدام المسارات
+app.use("/api/auth", authRoutes);  // كل مسارات التوثيق داخل /api/auth
+app.use("/api/amar", amarRoutes);  // مسارات "أمار" داخل /api/amar
 
-
-
-
-
-
-
-// make fun use async await only in create new no need 
-// use try catch 
-
-// const createUsers = async () => {
-//   try {
-//     // // First method: Using new and save()
-//     // const userNew = new User({ 
-//     //   name: "Ali",
-//     //   age: 25
-//     // });
-//     // await userNew.save();
-//     // console.log('User created using save():', userNew);
-
-//     // Second method: Using create()
-   
-//     console.log('User created using create():', userNew_);
-
-//   } catch (error) {
-//     console.error('Error creating users:', error);
-//   }
-// };
-
-// Execute the function
-// createUsers();
-
-
-
-
-
-
-
-
-
-
+// نقطة الوصول الأساسية
 app.get('/', (req, res) => {
-  res.send("Hello World")
-})
-// app.get('/amar', (req, res) => {
-//   res.send("donkey is hereee")
-// })
+  res.send("Hello World");
+});
 
-const PORT = process.env.PORT || '4000'
+const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
-  console.log(`Server started at http://localhost:${PORT}`)
-})
+  console.log(`Server started at http://localhost:${PORT}`);
+});
