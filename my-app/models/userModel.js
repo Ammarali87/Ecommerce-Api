@@ -1,4 +1,8 @@
 import { Schema, model } from "mongoose";
+//  bcrypt.compare
+//  bcrypt.hash
+//  userSchema.methods.compPassword
+//  userSchema.pre
 
 const userSchema = new Schema(
   {

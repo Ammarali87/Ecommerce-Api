@@ -20,7 +20,7 @@ app.use(router, amar)
 app.use(router, login)
 app.use(router, logout)
 app.use(router, signup)
-app.use(cateR, addCategory)
+app.use(router, addCategory)
 app.use(router, getCategories)
  
 
