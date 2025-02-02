@@ -6,7 +6,7 @@ import slugify from 'slugify';
 export const addCategory = async (req, res) => {
     try {
       const { name } = req.body;
-  
+
       if (!name) {
         return res.status(400).json({
            status: 'fail', message: 'Category name is required' });
@@ -16,15 +16,12 @@ export const addCategory = async (req, res) => {
    name,slug:slugify(name, { lower:true , strict:true }) })
   
       res.status(201).json({ status: 'success', newCategory });
-    } catch (error) {
+    } catch (error) {  
       console.error('Error adding category:', error); // More detailed logging
       return res.status(500).json({ status: 'error', message: error.message || 'Error adding category' });
     }
   };
   
-
-
-
 
 
 
