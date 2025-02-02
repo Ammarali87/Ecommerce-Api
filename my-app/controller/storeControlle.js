@@ -12,10 +12,8 @@ export const addCategory = async (req, res) => {
            status: 'fail', message: 'Category name is required' });
       }
   
-      const newCategory = new Category({ name,
-        slug: slugify(name, { lower: true, strict: true })
-    });
-      await newCategory.save();
+      const newCategory = await Category.create({
+   name,slug:slugify(name, { lower:true , strict:true }) })
   
       res.status(201).json({ status: 'success', newCategory });
     } catch (error) {
