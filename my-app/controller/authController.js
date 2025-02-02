@@ -13,9 +13,10 @@ export async function signup(req, res) {
     const newUser = await User.create({ name, email, password });
 
     const token = signToken(newUser._id);
+    console.log("sign up success")
     res.status(201).json({ status: 'success', token, user: { id: newUser._id, name, email } });
   } catch (err) {  
-    if (err.name === 'ValidationError') {
+    if (err. name === 'ValidationError') {
       // Object.valuesExtract all error messages: 
       // If multiple fields are invalid, it returns an array
       const messages = Object.values(err.errors).map((er) => er.message);
@@ -35,36 +36,40 @@ export async function signup(req, res) {
 
 
 // **Login**
+
 export async function login(req, res) {
   try {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      console.log("no email or password");
-      
+      console.log("No email or password provided");
       return res.status(400).json({ message: 'Please provide email and password' });
     }
 
-    const user = await findOne({ email }).select('+password');
-    if (!user ||  
-      // use !( await)
-      // bad  await User.crypt.comparePawword(enterPAssword)
-      !(await user.comparePassword(password))) {
-        console.log("inCorrect email or password");
-        return res.status(401).json({ message: 'Incorrect email or password' });
+    const user = await User.findOne({ email }).select('+password');
+
+    if (!user || !(await user.comparePassword(password))) {
+      console.log("Incorrect email or password");
+      return res.status(401).json({ message: 'Incorrect email or password' });
     }
-      // warning  if he put const toke first
-      // the user will login this Bad 
-      // if to prevent login  if any error 
+
     const token = signToken(user._id);
-    res.json({ status: 'success', token, user: { id: user._id, name: user.name, email } });
+
+    res.status(200).json({
+      status: 'success',
+      token,
+      user: { id: user._id, name: user.name, email: user.email },
+    });
   } catch (err) {
-    res.status(500).json({ message: 'Server error' });
+    console.error("Server error:", err);
+    res.status(500).json({ message: 'Server error', error: err.message });
   }
 }
 
+
 // **Logout**
 export function logout(req, res) {
-  res.cookie('jwt', '', { expires: new Date(0), httpOnly: true });
+  res.cookie('jwt', '',
+     { expires: new Date(0), httpOnly: true });
   res.status(200).json({ status: 'success', message: 'Logged out successfully' });
 }
