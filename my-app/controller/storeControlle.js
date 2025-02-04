@@ -1,7 +1,10 @@
 import Category from '../models/categoryModel.js';
 import slugify from 'slugify';
 import ApiError from '../utils/ApiError.js';
-
+import fuzzysearch from "fuzzysearch";
+// i hate next() await async
+// also res.status.json({status:"success" , message:" ", result })
+// most hate try-catch to get global error 
 
 // Add Category Function
 export const addCategory = async (req, res) => {
@@ -63,7 +66,7 @@ export const getOneCategory = async (req, res, next) => {
 };
 
 
-
+// searchCategories by query
 
 export const searchCategories = async (req, res, next) => {
   try {
@@ -75,12 +78,39 @@ export const searchCategories = async (req, res, next) => {
 
     // Find categories where 'name' matches the search query (case-insensitive)
     const categories = await Category.find({
-      name: { $regex: query, $options: 'i' }, // 'i' makes it case-insensitive
-    });
+      name: { $regex: query, $options: 'i' },
+// this default in mongoDB I not 1, qury not name 
+    });  
 
     res.status(200).json({ status: 'success', categories });
   } catch (error) {
     console.error('Error searching categories:', error);
     return next(new ApiError(500, 'Error searching categories'));
+  }
+};
+
+ 
+
+
+
+//  fuzzysearch with filter and fuzz
+
+export const theFuzzySearch = async (req, res, next) => {
+  try {
+    const query = req.query.q;
+    if (!query) {
+      return res.status(400).json({ status: "fail", message: "Search query is required" });
+    }
+
+    const allCategories = await Category.find();
+     // Get all categories
+    const filtered = allCategories
+    .filter((cat) => fuzzysearch
+    (query.toLowerCase(), cat.name.toLowerCase()));
+
+    res.status(200).json({ status: "success", categories: filtered });
+  } catch (error) {
+    console.error("Error searching categories:", error);
+    next(error);
   }
 };
