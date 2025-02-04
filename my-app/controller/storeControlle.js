@@ -94,7 +94,7 @@ export const searchCategories = async (req, res, next) => {
 
 
 //  fuzzysearch with filter and fuzz
-
+// fuzzysearch(whatSearch,matchTo) category.name
 export const theFuzzySearch = async (req, res, next) => {
   try {
     const query = req.query.q;
@@ -105,8 +105,8 @@ export const theFuzzySearch = async (req, res, next) => {
     const allCategories = await Category.find();
      // Get all categories
     const filtered = allCategories
-    .filter((cat) => fuzzysearch
-    (query.toLowerCase(), cat.name.toLowerCase()));
+    .filter((cate) => fuzzysearch
+    (query.toLowerCase(), cate.name.toLowerCase()));
 
     res.status(200).json({ status: "success", categories: filtered });
   } catch (error) {
@@ -114,3 +114,18 @@ export const theFuzzySearch = async (req, res, next) => {
     next(error);
   }
 };
+ 
+// cat.name.tolower Converts category names to
+//  lowercase for case-insensitive search.
+// query.toLowerCase()	Converts user input
+//  to lowercase for better matching.
+
+
+
+  // alt to fuzzy 
+// import stringSimilarity from "string-similarity";
+
+// const filtered = allCategories.filter((cat) => {
+//   const similarity = stringSimilarity.compareTwoStrings(query.toLowerCase(), cat.name.toLowerCase());
+//   return similarity > 0.6; // Adjust threshold for better results
+// });
