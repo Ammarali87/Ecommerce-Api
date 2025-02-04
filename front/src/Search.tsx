@@ -37,13 +37,15 @@ const SearchPage = ({ onSearch = () => {} }: SearchBarProps) => {
   }, [query]);
 
   return (
-    <div className="w-full max-w-md mx-auto p-4">
+    <div className="w-full bg-red-700 max-w-md mx-auto p-4">
       <input
         type="text"
         placeholder="Search categories..."
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className="w-full
+         p-2 border 
+         border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
       />
 
       {loading && <p className="text-gray-500 mt-2">Loading...</p>}

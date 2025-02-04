@@ -1,39 +1,5 @@
 @import "tailwindcss";
 
-.search-bar {
-  position: relative;
-  width: 100%;
-  max-width: 400px;
-}
 
-.search-bar input {
-  width: 100%;
-  padding: 8px;
-  border: 1px solid #ccc;
-}
 
-.suggestions {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  position: absolute;
-  width: 100%;
-  background: rgb(11, 83, 226) !important;
-  border: 1px solid #ccc;
-  max-height: 200px;
-  overflow-y: auto;
-}
-
-.suggestions li {
-  padding: 8px;
-  cursor: pointer;
-}
-
-.suggestions li:hover {
-  background: #f0f0f0;
-}
-
-.error {
-  color: red;
-  font-size: 14px;
-}
+/* Your other styles below */
