@@ -3,3 +3,6 @@ export interface Category {
     name: string;
   }
   
+ export interface SearchBarProps {
+    onSearch: (query: string) => void;
+  }

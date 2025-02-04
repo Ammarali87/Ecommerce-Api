@@ -1,10 +1,8 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { Category } from "../types/element"; // Importing the Category interface
+import { Category , SearchBarProps } from "../types/element"; // Importing the Category interface
 
-interface SearchBarProps {
-  onSearch: (query: string) => void;
-}
+
 
 const SearchBar = ({ onSearch }: SearchBarProps) => {
   const [query, setQuery] = useState("");
@@ -57,7 +55,7 @@ const SearchBar = ({ onSearch }: SearchBarProps) => {
       {suggestions.length > 0 && (
         <ul className="suggestions">
           {suggestions.map((category) => (
-            <li key={category._id} onClick={() => handleSelect(category.name)}>
+  <li key={category._id} onClick={() => handleSelect(category.name)}>
               {category.name}
             </li>
           ))}
