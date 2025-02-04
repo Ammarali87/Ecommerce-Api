@@ -18,7 +18,8 @@ const SearchPage = () => {
       setError("");
 
       try {
-        const { data } = await axios.get(`/api/search?q=${query}`);
+        const { data } = await
+         axios.get(`/api/v1/search?q=${query}`);
         setResults(data.categories);
       } catch (error) {
         console.error("Error fetching search results:", error);

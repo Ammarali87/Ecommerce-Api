@@ -21,7 +21,8 @@ const SearchBar = ({ onSearch }: SearchBarProps) => {
       setError("");
 
       try {
-        const { data } = await axios.get(`/api/search?q=${query}`);
+        const { data } = await
+         axios.get(`/api/v1/search?q=${query}`);
         setSuggestions(data.categories);
       } catch (err) {
         setError("Error fetching suggestions.");

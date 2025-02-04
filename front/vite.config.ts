@@ -5,8 +5,11 @@ export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
-      "/api": "http://localhost:3000",
-      //  // Redirect API calls to Express
+      "/api": {
+        target: "http://localhost:3000", // 👈 backend
+        changeOrigin: true,
+        secure: false,
+      },
     },
   },
 });
