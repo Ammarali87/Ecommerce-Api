@@ -1,15 +1,8 @@
 import { useState, useEffect } from "react";
-import './App.css'
-
 import axios from "axios";
+import { Category } from "./types/element"; // Importing the Category interface
 
-
-function App() {
-  interface Category {
-    _id: string;
-    name: string;
-  }
-
+const App = () => {
   const [categories, setCategories] = useState<Category[]>([]);
 
   useEffect(() => {
@@ -30,11 +23,11 @@ function App() {
       <h1>Categories</h1>
       <ul>
         {categories.map((category) => (
-          <li key={category?._id}>{category?.name}</li>
+          <li key={category._id}>{category.name}</li>
         ))}
       </ul>
     </div>
   );
-}
+};
 
 export default App;
