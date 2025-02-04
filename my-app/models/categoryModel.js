@@ -18,7 +18,7 @@ const categorySchema = new Schema({
     trim: true,
   },
   image: {
-    type: String,
+    type: String,default:null
   },
 }, { timestamps: true }); // This automatically adds createdAt & updatedAt
 

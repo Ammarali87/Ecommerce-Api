@@ -2,32 +2,66 @@ import Category from '../models/categoryModel.js';
 import slugify from 'slugify';
 import ApiError from '../utils/ApiError.js';
 import fuzzysearch from "fuzzysearch";
+import cloudinary from "../config/cloudinaryConfig.js";
+
 // i hate next() await async
 // also res.status.json({status:"success" , message:" ", result })
 // most hate try-catch to get global error 
 
 // Add Category Function
-export const addCategory = async (req, res) => {
-    try {
-      const { name } = req.body;
+// export const addCategory = async (req, res) => {
+//     try {
+//       const { name } = req.body;
 
-      if (!name) {
-        return res.status(400).json({
-           status: 'fail', message: 'Category name is required' });
-      }
+//       if (!name) {
+//         return res.status(400).json({
+//            status: 'fail', message: 'Category name is required' });
+//       }
   
-      const newCategory = await Category.create({
-   name,slug:slugify(name, { lower:true , strict:true }) })
+//       const newCategory = await Category.create({
+//    name,slug:slugify(name, { lower:true , strict:true }) })
   
-      res.status(201).json({ status: 'success', newCategory });
-    } catch (error) {  
-      console.error('Error adding category:', error); // More detailed logging
-      // return res.status(500).json({ status: 'error', message: error.message || 'Error adding category' });
-     return next(new ApiError(500 , "error add category"))
+//       res.status(201).json({ status: 'success', newCategory });
+//     } catch (error) {  
+//       console.error('Error adding category:', error); // More detailed logging
+//       // return res.status(500).json({ status: 'error', message: error.message || 'Error adding category' });
+//      return next(new ApiError(500 , "error add category"))
+//     }
+//   };
+  
+export const addCategory = async (req, res, next) => {
+  try {
+    const { name, image } = req.body;
+
+    if (!name) {
+      return res.status(400).json({
+        status: "fail",
+        message: "Category name is required",
+      });
     }
-  };
-  
 
+    // رفع الصورة إلى Cloudinary (إذا كانت موجودة)
+    let imageUrl = "";
+    if (image) {
+      const uploadResponse = await cloudinary.uploader.upload(image, {
+        folder: "categories",
+      });
+      imageUrl = uploadResponse.secure_url;
+    }
+
+    // إنشاء الفئة في قاعدة البيانات
+    const newCategory = await Category.create({
+      name,
+      slug: slugify(name, { lower: true, strict: true }),
+      image: imageUrl,
+    });
+
+    res.status(201).json({ status: "success", newCategory });
+  } catch (error) {
+    console.error("Error adding category:", error);
+    return next(new ApiError(500, "Error adding category"));
+  }
+};
 
 
 // Get Categories Function
