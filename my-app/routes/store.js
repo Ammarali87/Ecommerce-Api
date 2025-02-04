@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { addCategory, getCategories } from '../controller/storeControlle.js';
-import { searchCategories } from '../controllers/storeController.js';
+import { searchCategories } from '../controller/storeControlle.js' 
 
 const router = Router();
 

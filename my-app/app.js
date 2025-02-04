@@ -5,11 +5,13 @@ import { connect } from './config/mongo.js';
 import amarRoutes from './routes/amar.js';
 import authRoutes from './routes/authRoute.js';
 import storeRoutes from './routes/store.js';
-  
+import cors from "cors";
+
 dotenv.config(); // 📌 يجب أن يكون في البداية قبل استخدام أي متغير بيئي
 
 const app = express();
 
+app.use(cors()); // Allow frontend to call backend
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
