@@ -37,7 +37,7 @@ const SearchPage = ({ onSearch = () => {} }: SearchBarProps) => {
   }, [query]);
 
   return (
-    <div className="w-full bg-red-700 max-w-md mx-auto p-4">
+    <div className="w-full  max-w-md mx-auto p-4">
       <input
         type="text"
         placeholder="Search categories..."
