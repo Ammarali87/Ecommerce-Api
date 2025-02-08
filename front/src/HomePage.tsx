@@ -2,10 +2,15 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { Category } from "./types/element"; // تأكد أن هذا الملف موجود
   //  error was setcategroy(data.categories) not setto categers
-   
-const HomePage = () => {
-  const [categories, setCategories] = useState<Category[]>([]);
+  //  {cate.length > 0 ? ():() }
+ //  useState(Categorites[])
+ // intila load and repeat useEffect
+ //  trigger fetchCategories() in useEffect
 
+
+  const HomePage = () => {
+  const [categories, setCategories] = useState<Category[]>([]);
+  
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -25,15 +30,15 @@ const HomePage = () => {
   return (
     <div>
       <h1>Categories</h1>
-      <ul>
-        {categories.length > 0 ? (
-          categories.map((category) => (
+      {categories.length > 0 ? (
+        <ul>  
+          {categories.map((category) => (
             <li key={category._id}>{category.name}</li>
-          ))
-        ) : (
-          <p>Loading...</p>
-        )}
-      </ul>
+          ))}
+        </ul>
+      ) : (
+        <p>Loading...</p>
+      )}
     </div>
   );
 };

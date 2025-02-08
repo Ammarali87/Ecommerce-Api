@@ -14,15 +14,19 @@ const router = createBrowserRouter([
     element: <Layout />, // 🔹 Wrap routes with Layout
     children: [
       { index: true, element: <HomePage /> }, // Home page
-      { path: "search", element: 
-      <SearchPage onSearch={(query) =>
-         console.log(query)} /> }, // Search page
+      { path: "search", element: <SearchPage  /> },
     ],
   },
   {path:"/Dashboard", element:<Dashboard/>}
 ]);
 
-createRoot(document.getElementById("root")!).render(
+// onSearch={(query) =>
+  // console.log(query)}
+
+
+
+
+  createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <RouterProvider router={router} />
   </StrictMode>

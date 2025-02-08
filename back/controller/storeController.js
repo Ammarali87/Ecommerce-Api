@@ -15,8 +15,8 @@ import cloudinary from "../config/cloudinaryConfig.js";
 //   api_secret: process.env.CLOUDINARY_API_SECRET,
 // });
 
-export const addCategory = async (req, res, next) => {
-  try {
+export const addCategory = async (req, res) => {
+  try { 
     const { name } = req.body;
     if (!name) {
       return res.status(400).json({ message: "Category name is required" });
@@ -27,25 +27,38 @@ export const addCategory = async (req, res, next) => {
     }
 
     let imageUrl = "";
-    if (req.file) {
-      const result = await new Promise((resolve, reject) => {
+    // const result = await new Promise((resolve, reject) => {
+    //   cloudinary.uploader.upload_stream(
+    //     { folder: "categories" }, 
+    //  // رفع الملف داخل مجلد اسمه "categories"
+    //     (error, result) => {
+    //       if (error) reject(error); 
+    // // لو فيه خطأ، نرفض الـ Promise
+    //       else resolve(result);     // لو نجح، نمرر النتيجة
+    //     }
+    //   ).end(req.file.buffer); // رفع البيانات إلى Cloudinary
+    // });
+      //  use await new Promise do the async uploader
+      //  promise do async and callback
+    const result = await new Promise((resolve, reject) => {
         cloudinary.uploader.upload_stream(
           { folder: "categories" },
-          (error, result) => {
+          (error, result) => {  // callback
             if (error) reject(error);
             else resolve(result);
-          }
-        ).end(req.file.buffer);
-      });
-
+          } 
+          //   rej(err) slove(result)
+        ).end(req.file.buffer);  // == res.end()
+         // إرسال الصورة مباشرةً بدون حفظ علي سيرفر
+      });  // uploader.upload_stream({},(err,resu)=>{})
+                
       imageUrl = result.secure_url;
-    }
-
+     
     const newCategory = await Category.create({
       name,
       slug: slugify(name, { lower: true, strict: true }),
       image: imageUrl,
-    });
+    }); 
 
     console.log("Created Category:", newCategory); // ✅ تأكد أن الصورة مرفوعة
     res.status(201).json({ status: "success", newCategory });
