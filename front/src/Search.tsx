@@ -65,9 +65,14 @@ import { Category, SearchBarProps } from "./types/element";
               // onClick={() => onSearch(category.name)}
               className="p-2 hover:bg-gray-100 cursor-pointer"
             >
-             <p className="details">
-             <img src={category.name} alt={category.name} />
-             </p>
+         <p className="details flex flex-col items-center text-center">
+  <img src={category.image} // تأكد أن هذا هو الرابط الصحيح للصورة
+    alt={category.name}
+    className="w-11 h-7 object-cover rounded-lg shadow-md"
+  />
+  <span className="mt-2 text-lg font-semibold text-gray-700">{category.name}</span>
+</p>
+
             </li>
           ))}
         </ul>

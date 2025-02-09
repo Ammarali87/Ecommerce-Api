@@ -4,7 +4,12 @@ import ApiError from '../utils/ApiError.js';
 import fuzzysearch from "fuzzysearch";
 import cloudinary from "../config/cloudinaryConfig.js";
 // import { v2 as cloudinary } from "cloudinary";
-
+// findOne/ById 
+// const {name,id} = req.params
+// const {query} = req.query
+// Category.find({
+  // name: { $regex: query, $options: 'i' }
+  
 // i hate next() await async
 // also res.status.json({status:"success" , message:" ", result })
 // most hate try-catch to get global error 
@@ -14,6 +19,9 @@ import cloudinary from "../config/cloudinaryConfig.js";
 //   api_key: process.env.CLOUDINARY_API_KEY,
 //   api_secret: process.env.CLOUDINARY_API_SECRET,
 // });
+ 
+  // const {name} = req.body   to create
+  // const {name} = req.params  to get
 
 export const addCategory = async (req, res) => {
   try { 
@@ -21,37 +29,24 @@ export const addCategory = async (req, res) => {
     if (!name) {
       return res.status(400).json({ message: "Category name is required" });
     }
-      // for img check file 
+
     if (!req.file) {
       return res.status(400).json({ message: "Image file is required" });
     }
 
     let imageUrl = "";
-    // const result = await new Promise((resolve, reject) => {
-    //   cloudinary.uploader.upload_stream(
-    //     { folder: "categories" }, 
-    //  // رفع الملف داخل مجلد اسمه "categories"
-    //     (error, result) => {
-    //       if (error) reject(error); 
-    // // لو فيه خطأ، نرفض الـ Promise
-    //       else resolve(result);     // لو نجح، نمرر النتيجة
-    //     }
-    //   ).end(req.file.buffer); // رفع البيانات إلى Cloudinary
-    // });
-      //  use await new Promise do the async uploader
-      //  promise do async and callback
+
     const result = await new Promise((resolve, reject) => {
         cloudinary.uploader.upload_stream(
           { folder: "categories" },
           (error, result) => {  // callback
             if (error) reject(error);
             else resolve(result);
-          } 
-          //   rej(err) slove(result)
+          }
         ).end(req.file.buffer);  // == res.end()
          // إرسال الصورة مباشرةً بدون حفظ علي سيرفر
-      });  // uploader.upload_stream({},(err,resu)=>{})
-                
+      });   
+
       imageUrl = result.secure_url;
      
     const newCategory = await Category.create({
@@ -76,9 +71,17 @@ export const addCategory = async (req, res) => {
 
 // Get Categories Function
 export const getCategories = async (req, res) => {
-  try {
-    const categories = await Category.find();
-    res.status(200).json({ status: 'success', categories });
+  const page = req.body.query * 1 || 1 ;
+   // *1 conv num to string
+  const limit = req.body.query * 1 || 5
+  //wrong.body.limit 
+  const skip = (page-1)*limit ; 
+
+  try { 
+    const categories = await 
+    Category.find().skip(skip).limit(limit);
+    res.status(200).json({ status: 'success',
+      result: categories.length ,page ,data: categories });
   } catch (error) {
     console.log('Error fetching categories:', error);
     // res.status(500).json({ status: 'error', message: 'Error fetching categories' });
@@ -94,9 +97,8 @@ return next(new ApiError(500, 'Error fetching categories')); // 👈 Send to err
 
 export const getOneCategory = async (req, res, next) => {
   try {
-    const { name } = req.params; // Get category name from URL params
-
-    const category = await Category.findOne({ name: name }); // Find by name
+    const { id } = req.params; //like id from params
+    const category = await Category.findById(id);  
 
     if (!category) {
       return next(new ApiError(404, 'Category not found'));
@@ -115,7 +117,7 @@ export const getOneCategory = async (req, res, next) => {
 export const searchCategories = async (req, res, next) => {
   try {
     const { query } = req.query; // Get search query from URL (e.g., ?query=phones)
-
+ 
     if (!query) {
       return next(new ApiError(400, 'Search query is required'));
     }
@@ -124,7 +126,7 @@ export const searchCategories = async (req, res, next) => {
     const categories = await Category.find({
       name: { $regex: query, $options: 'i' },
 // this default in mongoDB I not 1, qury not name 
-    });  
+    }); 
 
     res.status(200).json({ status: 'success', categories });
   } catch (error) {
@@ -140,8 +142,8 @@ export const searchCategories = async (req, res, next) => {
 //  fuzzysearch with filter and fuzz
 // fuzzysearch(whatSearch,matchTo) category.name
 export const theFuzzySearch = async (req, res, next) => {
-  try {
-    const query = req.query.q;
+  try { 
+    const query = req.query ;
     if (!query) {
       return res.status(400).json({ status: "fail", message: "Search query is required" });
     }
