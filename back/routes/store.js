@@ -11,7 +11,9 @@ const router = Router();
 router.post("/add-category",
      upload.single("image"), addCategory);
 
-router.route('/category').post(addCategory).get(getOneCategory);
+router.route('/category').
+post(addCategory)
+.get(getOneCategory);
 router.get('/categories', getCategories);
 router.get('/search', theFuzzySearch);
 router.route("/:id").get(getOneCategory)
