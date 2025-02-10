@@ -1,19 +1,15 @@
 import { Outlet, Link } from "react-router-dom";
-import SearchBar from "./component/SearchBar";
 
 const Layout = () => {
   return (
-    <div>
+    <div className="flex flex-col justify-between
+     bg-emerald-400">
       {/* Navbar */}
-      <nav>
+      <nav className="fixed-top bg-amber-400 flex ">
         <ul>
           <li><Link to="/">Home</Link></li>
           <li><Link to="/search">Search</Link></li>
         </ul>
-    <SearchBar onSearch={function
-     (_query: string): void {
-  throw new Error("Function not implemented.");
-            } }/>
       </nav>
 
       {/* Page Content */}

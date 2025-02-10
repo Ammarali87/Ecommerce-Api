@@ -1,50 +1,81 @@
 import { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
 import axios from "axios";
-import { Category } from "./types/element"; // Importing the Category interface
+import { Category, SearchBarProps } from "./types/element";
 
-const SearchPage = () => {
-  const [searchParams] = useSearchParams();
-  const query = searchParams.get("q") || "";
-  const [results, setResults] = useState<Category[]>([]);
+
+
+
+// ({ onSearch = () => {} }: SearchBarProps)
+
+ const SearchPage= ()=> {
+
+  const [query, setQuery] = useState("");
+  const [suggestions, setSuggestions] = 
+  useState<Category[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+    
   useEffect(() => {
-    if (!query) return;
+    if (query.length < 2) {
+      setSuggestions([]);
+      return;
+    }
 
-    const fetchResults = async () => {
+    const delayDebounce = setTimeout(async () => {
       setLoading(true);
       setError("");
 
-      try {
-        const { data } = await
-         axios.get(`/api/v1/search?q=${query}`);
-        setResults(data.categories);
-      } catch (error) {
-        console.error("Error fetching search results:", error);
-        setError("Failed to fetch results.");
+      try {   
+        const { data:{categories} } = await axios.get(`/api/v1/search?q=${query}`);
+        setSuggestions(categories);
+      } catch (err: any) { 
+        setError(err.response?.data?.message || "Error fetching suggestions.");
+        console.error("Search Error:", err);
       } finally {
         setLoading(false);
-      }
-    };
+      } 
+    }, 300); 
+     // end delayDebounce
 
-    fetchResults();
+     return () => clearTimeout(delayDebounce);
   }, [query]);
 
   return (
-    <div>
-      <h2>Search Results for: {query}</h2>
-      {loading && <p>Loading...</p>}
-      {error && <p className="error">{error}</p>}
-      {results.length > 0 ? (
-        <ul>
-          {results.map((category) => (
-            <li key={category._id}>{category.name}</li>
+    <div className="w-full  max-w-md mx-auto p-4">
+      <input
+        type="text"
+        placeholder="Search categories..."
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        className="w-full
+         p-2 border 
+         border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+      />
+
+      {loading && <p className="text-gray-500 mt-2">Loading...</p>}
+      {error && <p className="text-red-500 mt-2">{error}</p>}
+        {/* if {var && }
+        if {arr.length > 0 &&()} lot data use && () */}
+      {suggestions.length > 0 && (
+        <ul className="mt-2 bg-white shadow-lg rounded-lg overflow-hidden">
+          {suggestions.map((category) => (
+            <li  // arrow fun map use =>(ul)
+              key={category._id}
+              // onClick={() => onSearch(category.name)}
+              className="p-2 hover:bg-gray-100 cursor-pointer"
+            >
+         <p className="details flex flex-col items-center text-center">
+  <img src={category.image} // تأكد أن هذا هو الرابط الصحيح للصورة
+    alt={category.name}
+    className="w-11 h-7 object-cover rounded-lg shadow-md"
+  />
+  <span className="mt-2 text-lg font-semibold text-gray-700">{category.name}</span>
+</p>
+
+            </li>
           ))}
         </ul>
-      ) : (
-        !loading && <p>No results found</p>
       )}
     </div>
   );

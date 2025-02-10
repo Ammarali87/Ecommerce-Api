@@ -18,9 +18,10 @@ const categorySchema = new Schema({
     trim: true,
   },
   image: {
-    type: String,default:null
+    type: String , 
+    required:false
   },
-}, { timestamps: true }); // This automatically adds createdAt & updatedAt
+}, { timestamps: true }); 
 
 
 const Category = model('Category', categorySchema);
