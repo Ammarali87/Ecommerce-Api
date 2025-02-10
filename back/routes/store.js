@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { addCategory,getOneCategory, getCategories, searchCategories, theFuzzySearch } from 
+import { addCategory,getOneCategory, getCategories, searchCategories, theFuzzySearch, updateOneCategory } from 
 '../controller/storeController.js';
 import upload from "../middleware/uploadMiddleware.js";
 
@@ -15,8 +15,10 @@ router.post("/add-category", upload.single("image"), addCategory);
 router.get('/categories', getCategories);
 router.get('/category', getOneCategory);
 router.get('/search', theFuzzySearch);
-// router.route("/:id").get(getOneCategory)
-router.get("/:id",getOneCategory)
+router.route("/:id")
+.get(getOneCategory)
+.post(updateOneCategory)
+
 export default router;
 
 

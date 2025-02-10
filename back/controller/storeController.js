@@ -62,7 +62,7 @@ export const getCategories = async (req, res, next) => {
       totalPages: Math.ceil(totalCount / limit),
       totalCount, 
       data: categories,
-    });
+    });   // Math.ceil no ارقام عشرية 
 
   } catch (error) {
     console.error("Error fetching categories:", error);
@@ -70,30 +70,11 @@ export const getCategories = async (req, res, next) => {
   }
 };
 
-// export const getCategories = async (req, res, next) => {
-//   try {
-//     const page = Math.max(1,
-//  parseInt(req.query.page) || 1);
-//     const limit = Math.max(1, 
-// parseInt(req.query.limit) || 5);
-//     const skip = (page - 1) * limit;
 
 //     const [categories, totalCount] = await Promise.all([
 //       Category.find().skip(skip).limit(limit),
 //       Category.countDocuments()
 //     ]);
-
-//     res.status(200).json({
-//       status: "success",
-//       page,
-//       totalPages: Math.ceil(totalCount / limit),
-//       totalCount,
-//       data: categories,
-//     });
-//   } catch (error) {
-//     next(new ApiError(500, "Error fetching categories"));
-//   }
-// };
 
 
 
@@ -112,6 +93,33 @@ export const getOneCategory = async (req, res, next) => {
     next(new ApiError(500, "Error fetching category"));
   }
 };
+
+
+
+
+// ✅ تحسين `getOneCategory`
+export const updateOneCategory = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { name } = req.body;
+
+    const category = await Category.findOneAndUpdate(
+      { _id: id }, // الفلتر: البحث عن العنصر باستخدام الـ ID
+      { name },    // البيانات التي سيتم تحديثها
+      { new: true } // الخيارات: إرجاع العنصر بعد التحديث
+    );
+    
+    if (!category) return next(new ApiError(404, "Category not found"));
+
+    res.status(200).json({ status: "success", category });
+  } catch (error) {
+    console.error("Error fetching category:", error);
+    next(new ApiError(500, "Error fetching category"));
+  }
+};
+
+
+
 
 // ✅ تحسين البحث
 export const searchCategories = async (req, res, next) => {
