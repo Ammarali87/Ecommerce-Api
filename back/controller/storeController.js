@@ -97,27 +97,48 @@ export const getOneCategory = async (req, res, next) => {
 
 
 
-// ✅ تحسين `getOneCategory`
-export const updateOneCategory = async (req, res, next) => {
+export const updateCategory = async (req, res, next) => {
   try {
     const { id } = req.params;
     const { name } = req.body;
 
     const category = await Category.findOneAndUpdate(
-      { _id: id }, // الفلتر: البحث عن العنصر باستخدام الـ ID
-      { name },    // البيانات التي سيتم تحديثها
-      { new: true } // الخيارات: إرجاع العنصر بعد التحديث
+      { _id: id }, // البحث عن العنصر باستخدام الـ ID
+      { 
+        name, 
+        slug: slugify(name, { lower: true }) // تحديث الـ slug يدويًا
+      },    
+      { new: true } 
     );
     
     if (!category) return next(new ApiError(404, "Category not found"));
 
     res.status(200).json({ status: "success", category });
   } catch (error) {
-    console.error("Error fetching category:", error);
-    next(new ApiError(500, "Error fetching category"));
+    console.error("Error updating category:", error);
+    next(new ApiError(500, "Error updating category"));
   }
 };
 
+
+
+
+ // delete category
+ export const deleteCategory = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    const category = await Category.deleteOne({id})
+    
+    if (!category) return next(new ApiError(404, "Category not Delete"));
+
+    res.status(200).json({ status:
+       "success Deleting", category });
+  } catch (error) {
+    console.error("Error Deleting category:", error);
+    next(new ApiError(500, "Error updating category"));
+  }
+};
 
 
 
