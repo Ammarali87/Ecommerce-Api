@@ -4,9 +4,6 @@ import { Category, SearchBarProps } from "./types/element";
 
 
 
-
-// ({ onSearch = () => {} }: SearchBarProps)
-
  const SearchPage= ()=> {
 
   const [query, setQuery] = useState("");
@@ -27,8 +24,7 @@ import { Category, SearchBarProps } from "./types/element";
       setError("");
 
       try {   
-        const { data:{categories} } = await axios.get(`/api/v1/search?q=${query}`);
-        setSuggestions(categories);
+        const { data:{categories} } = await axios.get(`/api/v1/search?query=${query}`);        setSuggestions(categories);
       } catch (err: any) { 
         setError(err.response?.data?.message || "Error fetching suggestions.");
         console.error("Search Error:", err);
