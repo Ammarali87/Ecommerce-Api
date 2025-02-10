@@ -44,24 +44,59 @@ export const addCategory = async (req, res, next) => {
 
 // ✅ تحسين `getCategories` و تصحيح `req.query`
 export const getCategories = async (req, res, next) => {
-  try {
-    const page = parseInt(req.query.page) || 1;
+  try {   // parseInt() or * 1 to make number
+    const page = req.query.page *1  || 1;
     const limit = parseInt(req.query.limit) || 5;
     const skip = (page - 1) * limit;
 
+    // ✅ جلب العدد الكلي للفئات
+    const totalCount = await Category.countDocuments();
+
+    // ✅ تطبيق limit على الاستعلام
     const categories = await Category.find().skip(skip).limit(limit);
 
     res.status(200).json({
       status: "success",
       result: categories.length,
       page,
+      totalPages: Math.ceil(totalCount / limit),
+      totalCount, 
       data: categories,
     });
+
   } catch (error) {
     console.error("Error fetching categories:", error);
     next(new ApiError(500, "Error fetching categories"));
   }
 };
+
+// export const getCategories = async (req, res, next) => {
+//   try {
+//     const page = Math.max(1,
+//  parseInt(req.query.page) || 1);
+//     const limit = Math.max(1, 
+// parseInt(req.query.limit) || 5);
+//     const skip = (page - 1) * limit;
+
+//     const [categories, totalCount] = await Promise.all([
+//       Category.find().skip(skip).limit(limit),
+//       Category.countDocuments()
+//     ]);
+
+//     res.status(200).json({
+//       status: "success",
+//       page,
+//       totalPages: Math.ceil(totalCount / limit),
+//       totalCount,
+//       data: categories,
+//     });
+//   } catch (error) {
+//     next(new ApiError(500, "Error fetching categories"));
+//   }
+// };
+
+
+
 
 // ✅ تحسين `getOneCategory`
 export const getOneCategory = async (req, res, next) => {
