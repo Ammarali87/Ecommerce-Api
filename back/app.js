@@ -29,7 +29,12 @@ app.use("/api/v1", storeRoutes);  // مسارات "أمار" داخل /api/amar
 app.get('/', (req, res) => {
   res.send("Hello donkey World");
 });
-
+// إذا حد حاول يزور مسار غير موجود، هيرجع 
+// JSON زي ده:
+app.all("*", (req, res, next) => {
+  const err = new Error(`Can't find this route: ${req.originalUrl}`);
+  next(err); // لازم تمرر الـ error object كامل
+});    
 
 app.use(errorMiddleware); // Handles all errors
 
