@@ -13,7 +13,7 @@ export const addCategory = async (req, res, next) => {
 
     let imageUrl = "";
 
-    // 🔹 رفع الصورة باستخدام `upload_stream`
+    // 🔹 رفع الصورة باستخدام upload_stream
     const result = await new Promise((resolve, reject) => {
       const stream = cloudinary.uploader.upload_stream(
         { folder: "categories" },
@@ -42,7 +42,7 @@ export const addCategory = async (req, res, next) => {
 };
 
 
-// ✅ تحسين `getCategories` و تصحيح `req.query`
+// ✅ تحسين getCategories و تصحيح req.query
 export const getCategories = async (req, res, next) => {
   try {   // parseInt() or * 1 to make number
     const page = req.query.page *1  || 1;
@@ -79,7 +79,7 @@ export const getCategories = async (req, res, next) => {
 
 
 
-// ✅ تحسين `getOneCategory`
+// ✅ تحسين getOneCategory
 export const getOneCategory = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -97,24 +97,20 @@ export const getOneCategory = async (req, res, next) => {
 
 
 
-export const updateCategory = async (req, res, next) => {
-  try {
-    const { id } = req.params;
-    const { name } = req.body;
 export const updateCategory = catchAsync(async (req, res, next) => {
   const { id } = req.params;
   const { name } = req.body;
 
-    const category = await Category.findOneAndUpdate(
-      { _id: id }, // البحث عن العنصر باستخدام الـ ID
-      { 
-        name, 
-        slug: slugify(name, { lower: true }) // تحديث الـ slug يدويًا
-      },    
-      { new: true } 
-    );
-    
-    if (!category) return next(new ApiError(404, "Category not found"));
+  const category = await Category.findOneAndUpdate(
+    { _id: id }, 
+    { 
+      name, 
+      slug: slugify(name, { lower: true }) 
+    },    
+    { new: true } 
+  );
+
+  if (!category) return next(new ApiError(404, "Category not found"));
 
   res.status(200).json({ status: "success", category });
 });
@@ -130,28 +126,6 @@ export const updateCategory = catchAsync(async (req, res, next) => {
     const category = await Category.findByIdAndDelete(id)
     // Category.deleteOne({id})
      // or {_id:id}
-    if (!category) return next(new ApiError(404, "Category not Delete"));
-
-    res.status(200).json({ status:
-       "success Deleting", category });
-  } catch (error) {
-    console.error("Error Deleting category:", error);
-    next(new ApiError(500, "Error updating category"));
-    console.error("Error updating category:", error);
-    next(new ApiError(500, "Error updating category"));
-  }
-};
-
-
-
-
- // delete category
- export const deleteCategory = async (req, res, next) => {
-  try {
-    const { id } = req.params;
-
-    const category = await Category.deleteOne({id})
-    
     if (!category) return next(new ApiError(404, "Category not Delete"));
 
     res.status(200).json({ status:
@@ -181,7 +155,7 @@ export const searchCategories = async (req, res, next) => {
   }
 };
 
-// ✅ تحسين البحث بالتقريب `fuzzy search`
+// ✅ تحسين البحث بالتقريب fuzzy search
 export const theFuzzySearch = async (req, res, next) => {
   try {
     const { query } = req.query;
