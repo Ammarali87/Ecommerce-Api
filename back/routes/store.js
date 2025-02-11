@@ -1,5 +1,8 @@
 import { Router } from 'express';
-import { addCategory,getOneCategory, getCategories, searchCategories, theFuzzySearch, updateOneCategory } from 
+import { addCategory,getOneCategory, getCategories,
+     searchCategories, theFuzzySearch,
+      updateCategory, 
+      deleteCategory} from 
 '../controller/storeController.js';
 import upload from "../middleware/uploadMiddleware.js";
 
@@ -17,7 +20,8 @@ router.get('/category', getOneCategory);
 router.get('/search', theFuzzySearch);
 router.route("/:id")
 .get(getOneCategory)
-.post(updateOneCategory)
+.post(updateCategory)
+.delete(deleteCategory)
 
 export default router;
 
