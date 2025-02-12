@@ -17,6 +17,8 @@ app.use(cors()); // Allow frontend to call backend
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// app.get('/favicon.ico', (req, res) => res.status(204).end());
+
 // الاتصال بقاعدة البيانات
 connect()
 
@@ -34,10 +36,19 @@ app.get('/', (req, res) => {
 // إذا حد حاول يزور مسار غير موجود، هيرجع 
 // JSON زي ده:
 app.all("*", (req, res, next) => {
-   next(new ApiError(400 , "Route not Found "+originalUrl)); // pass to global error function
+   next(new ApiError(400 , "Route not Found "+req.originalUrl)); // pass to global error function
 });    
 
 app.use(errorMiddleware); // Handles all errors
+// any error not stop the server in promise
+process.on("unhandledRejection", (err) => {
+  console.log(`Unhandled Rejection: ${err.message}`);
+  console.log(err.stack);
+
+  // Optionally exit the process in production
+  process.exit(1);
+});
+
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
