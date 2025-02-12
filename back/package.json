@@ -4,8 +4,10 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "dev" : "nodemon app.js"
-  },
+  "dev": "nodemon app.js",
+  "start": "set NODE_ENV=production nodemon app.js"
+}    
+,
   "keywords": [],
   "author": "",
   "license": "ISC",
