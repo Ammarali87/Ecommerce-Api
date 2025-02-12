@@ -6,6 +6,7 @@ import amarRoutes from './routes/amar.js';
 import authRoutes from './routes/authRoute.js';
 import storeRoutes from './routes/store.js';
 import cors from "cors";
+import ApiError from './utils/ApiError.js';
 
 dotenv.config(); // 📌 يجب أن يكون في البداية قبل استخدام أي متغير بيئي
 
@@ -33,8 +34,7 @@ app.get('/', (req, res) => {
 // إذا حد حاول يزور مسار غير موجود، هيرجع 
 // JSON زي ده:
 app.all("*", (req, res, next) => {
-  const err = new Error(`Can't find this route: ${req.originalUrl}`);
-  next(err); // pass to global error function
+   next(new ApiError(400 , "Route not Found "+originalUrl)); // pass to global error function
 });    
 
 app.use(errorMiddleware); // Handles all errors
