@@ -41,23 +41,25 @@ app.all("*", (req, res, next) => {
 });    
 
 app.use(errorMiddleware); // Handles all errors
-// any error not stop the server in promise
-process.on("unhandledRejection", (err) => {
-  console.log(`Unhandled Rejection:
-  ${err.message} |  ${err.name}
-     `);
-  console.log(err.stack);
-
-  // Optionally exit the process in production
-  process.exit(1);
-});
-
 
 const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`Server started at http://localhost:${PORT}`);
 });
     
+// any error not stop the server in promise
+// handle error outside express
+process.on("unhandledRejection", (err) => {
+  console.log(`Unhandled Rejection: ${err.message} |  ${err.name}`);
+  console.log(err.stack);
+  server.close(()=>{
+    console.err("shuting down...")
+  // exit the process in production use ejx
+    process.exit(1);
+  })
+});
+
+
 
 
 

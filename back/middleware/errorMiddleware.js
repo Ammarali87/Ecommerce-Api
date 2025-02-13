@@ -14,7 +14,7 @@ const errorHandler = (err, req, res, next) => {
    // run every seinario
   res.status(err.statusCode).json(response);
   
-  // console.log("Environment:", process.env.NODE_ENV);
+  console.log("Environment:", process.env.NODE_ENV);
 };
 
 export default errorHandler;
