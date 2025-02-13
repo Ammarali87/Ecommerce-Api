@@ -72,31 +72,9 @@ export default router;
 
 
 
-// import { Router } from 'express';
-// import { addCategory,getOneCategory, getCategories,searchCategories, theFuzzySearch, updateCategory,deleteCategory} from '../controller/storeController.js';
-// import upload from "../middleware/uploadMiddleware.js";
-// import { param, validationResult } from "express-validator";
-
-// const router = Router();
-// router.post("/add-category", upload.single("image"), addCategory);
 
 // // router.post('/newcategory', addCategory);
-// router.get('/categories', getCategories);
-// router.get('/category', getOneCategory);
-// router.get('/search', theFuzzySearch);
 
-
-// // Validation middleware for ID
-// const validateId = [
-//   param("id").isMongoId().withMessage("Invalid ID"),
-//   (req, res, next) => {
-//     const errors = validationResult(req);
-//     if (!errors.isEmpty()) {
-//       return res.status(400).json({ errors: errors.array() });
-//     }
-//     next(); // Proceed to the actual handler
-//   }
-// ];
 
 // router
 //   .route("/:id")
