@@ -9,21 +9,12 @@ import {
   deleteCategory 
 } from "../controller/storeController.js";
 import upload from "../middleware/uploadMiddleware.js";
-import { param, validationResult } from "express-validator";
+import validateId from "../utils/validator/validateId.js";
 
 const router = Router();
 
 // Validation middleware for ID
-const validateId = [
-  param("id").isMongoId().withMessage("Invalid ID"),
-  (req, res, next) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-    next(); // Proceed to the actual handler
-  }
-];
+
 
 // Add Category (POST)
 router.post("/add-category", upload.single("image"), addCategory);
