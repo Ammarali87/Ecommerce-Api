@@ -9,79 +9,28 @@ import {
   deleteCategory 
 } from "../controller/storeController.js";
 import upload from "../middleware/uploadMiddleware.js";
-import validateId from "../utils/validator/validateId.js";
+import validationMiddleware from "../middleware/validationMiddleware.js";
+import { validateDelete, validateId, validateUpdate } from "../utils/validator/validateId.js";
 
 const router = Router();
 
-// Validation middleware for ID
-
-
-// Add Category (POST)
+// ✅ إضافة كاتيجوري
 router.post("/add-category", upload.single("image"), addCategory);
 
-// Get all categories
+// ✅ جلب كل الكاتيجوريز
 router.get("/categories", getCategories);
 
-// Get a single category by ID
-router.get("/category/:id", validateId, getOneCategory);
+// ✅ جلب كاتيجوري واحد عن طريق الـ ID
+router.get("/category/:id", validateId, validationMiddleware, getOneCategory);
 
-// Search categories
+// ✅ البحث
 router.get("/search", searchCategories);
-router.get("/fuzzy-search", theFuzzySearch); 
+router.get("/fuzzy-search", theFuzzySearch);
 
-// Update and Delete a category by ID
+// ✅ تحديث وحذف كاتيجوري باستخدام ID
 router
   .route("/:id")
-  .post(validateId, updateCategory) // Use PUT instead of POST for updating
-  .delete(validateId, deleteCategory);
+  .put(validateUpdate, validationMiddleware, updateCategory)
+  .delete(validateDelete, validationMiddleware, deleteCategory);
 
 export default router;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// // router.post('/newcategory', addCategory);
-
-
-// router
-//   .route("/:id")
-//   .get(validateId, getOneCategory) // Apply validation before executing getOneCategory
-//   .post(updateCategory) // No ID validation needed here (unless required)
-//   .delete(validateId, deleteCategory); // Apply validation before executing deleteCategory
-
-// export default router;
-
-
-
-// // nested post get delete use this  
-// // router.route("/:id").get(getOneCategory)
-// //  one use this router.get("",fun)
-
-// // router.get('/search', searchCategories); // Example: /api/v1/search?query=tv
-
-
-

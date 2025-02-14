@@ -3,7 +3,9 @@ import slugify from 'slugify';
 import ApiError from '../utils/ApiError.js';
 import fuzzysearch from "fuzzysearch";
 import cloudinary from "../config/cloudinaryConfig.js";
-import catchAsync from '../utils/catchAsync.js'
+import catchAsync from '../utils/catchAsync.js';
+
+//  catchAsync use 
 
 export const addCategory = async (req, res, next) => {
   try { 

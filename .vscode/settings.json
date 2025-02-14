@@ -1,0 +1,10 @@
+{
+    "editor.formatOnSave": true,
+    "terminal.integrated.fontFamily": " Comic Sans MS ",
+    "terminal.integrated.fontSize": 14,
+    "editor.fontFamily": " Comic Sans MS ",
+    "editor.inlayHints.fontFamily": " Comic Sans MS ",
+    "editor.codeLensFontFamily": " Comic Sans MS ",
+    "notebook.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.defaultFormatter": "GitHub.copilot-chat"
+}
