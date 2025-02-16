@@ -3,13 +3,14 @@ import { Router } from 'express';
 import { createSubCategory,
      getSubCategory,
       getSubCategories,
-    //    updateSubCategory,
-        // deleteSubCategory,
+       updateSubCategory,
+        deleteSubCategory,
         //  setCategoryIdToBody,
         //   createFilterObj
          }
            from 
-          '../services/subCategoryService';
+          '../controller/subCategoryController.js';
+          
 import { 
     subCategoryValidator, 
     getSubCategoryValidator, 
@@ -24,7 +25,7 @@ import {
 // mergeParams: Allow us to access parameters on other routers
 // ex: We need to access categoryId from category router
 // const router = Router({ mergeParams: true });
-
+const router = Router() 
 router
   .route('/')
   .post(
@@ -37,20 +38,21 @@ router
   .get(
     // createFilterObj,
      getSubCategories);
+
 router
   .route('/:id')
   .get(getSubCategoryValidator, getSubCategory)
-//   .put(
+  .put(
 //     protect,
 //     allowedTo('admin', 'manager'),
-//     updateSubCategoryValidator,
-//     updateSubCategory
-//   )
-//   .delete(
+    updateSubCategoryValidator,
+    updateSubCategory
+  )
+  .delete(
 //     protect,
 //     allowedTo('admin'),
-//     deleteSubCategoryValidator,
-//     deleteSubCategory
-//   );
+    deleteSubCategoryValidator,
+    deleteSubCategory
+  );
 
 export default router;
