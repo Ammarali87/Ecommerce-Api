@@ -1,42 +1,45 @@
 import slugify from 'slugify';
-import { check, body } from 'express-validator';
-import validatorMiddleware from '../../middlewares/validatorMiddleware';
+import { check } from 'express-validator';
+import validationMiddleware from '../../middleware/validationMiddleware.js';
 
 export const getSubCategoryValidator = [
   check('id').isMongoId().withMessage('Invalid Subcategory id format'),
-  validatorMiddleware,
+  validationMiddleware,
 ];
 
 export const createSubCategoryValidator = [
   check('name')
     .notEmpty()
-    .withMessage('SubCategory required')
+    .withMessage('SubCategory name is required')
     .isLength({ min: 2 })
     .withMessage('Too short Subcategory name')
-    .isLength({ max: 32 })
-    .withMessage('Too long Subcategory name')
     .custom((val, { req }) => {
+      if (!val) return false;
       req.body.slug = slugify(val);
       return true;
     }),
-  check('category')
+  check('categoryId')
     .notEmpty()
-    .withMessage('subCategory must be belong to category')
+    .withMessage('Category ID is required')
     .isMongoId()
     .withMessage('Invalid Category id format'),
-  validatorMiddleware,
+  validationMiddleware,
 ];
 
 export const updateSubCategoryValidator = [
   check('id').isMongoId().withMessage('Invalid Subcategory id format'),
-  body('name').custom((val, { req }) => {
-    req.body.slug = slugify(val);
-    return true;
-  }),
-  validatorMiddleware,
+  check('name')
+    .optional()
+    .isLength({ min: 2 })
+    .withMessage('Too short Subcategory name')
+    .custom((val, { req }) => {
+      req.body.slug = slugify(val);
+      return true;
+    }),
+  validationMiddleware,
 ];
 
 export const deleteSubCategoryValidator = [
   check('id').isMongoId().withMessage('Invalid SubCategory id format'),
-  validatorMiddleware,
+  validationMiddleware,
 ];

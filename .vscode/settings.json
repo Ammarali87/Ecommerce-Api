@@ -1,6 +1,6 @@
 {
     "editor.formatOnSave": true,
-    "terminal.integrated.fontFamily": " Comic Sans MS ",
+    "terminal.integrated.fontFamily": "Consolas, 'Courier New', monospace" , 
     "terminal.integrated.fontSize": 14,
     "editor.fontFamily": " Comic Sans MS ",
     "editor.inlayHints.fontFamily": " Comic Sans MS ",

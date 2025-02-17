@@ -5,6 +5,7 @@ import { connect } from './config/mongo.js';
 import amarRoutes from './routes/amar.js';
 import authRoutes from './routes/authRoute.js';
 import storeRoutes from './routes/store.js';
+import subCategoryRoute from './routes/subCategoryRoute.js';
 import cors from "cors";
 import ApiError from './utils/ApiError.js';
 
@@ -12,10 +13,9 @@ dotenv.config(); // 📌 يجب أن يكون في البداية قبل است�
 
 const app = express();
 
-app.use(cors()); // Allow frontend to call backend
-// Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cors()); 
 
 app.get('/favicon.ico', (req, res) =>
    res.status(204));
@@ -24,10 +24,18 @@ app.get('/favicon.ico', (req, res) =>
 connect()
 
 // استخدام المسارات
-app.use("/api/v1/auth", authRoutes);  // كل مسارات التوثيق داخل /api/auth
-app.use("/api/v1/amar", amarRoutes);  // مسارات "أمار" داخل /api/amar
-app.use("/api/v1", storeRoutes);  // مسارات "أمار" داخل /api/amar
-  //  no name of route jsut any name with any string
+app.use("/api/v1/auth", authRoutes);   
+app.use("/api/v1/amar", amarRoutes);   
+app.use("/api/v1", storeRoutes);   
+// مفروض يكون زي ده
+// app.use('/api/v1/categories', categoryRoute);
+
+// Mount Routes
+app.use('/api/v1/subcategories', subCategoryRoute);
+
+// Mount subcategories on category routes (nested routes)
+app.use('/api/v1/categories/:categoryId/subcategories', subCategoryRoute);
+
 
 // نقطة الوصول الأساسية
 app.get('/', (req, res) => {
