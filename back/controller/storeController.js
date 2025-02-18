@@ -44,7 +44,6 @@ export const addCategory = async (req, res, next) => {
 };
 
 
-// ✅ تحسين getCategories و تصحيح req.query
 export const getCategories = async (req, res, next) => {
   try {   // parseInt() or * 1 to make number
     const page = req.query.page *1  || 1;

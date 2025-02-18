@@ -1,6 +1,6 @@
 import errorMiddleware from './middleware/errorMiddleware.js'
 import dotenv from 'dotenv';
-import express from 'express';
+import express, { urlencoded } from 'express';
 import { connect } from './config/mongo.js';
 import amarRoutes from './routes/amar.js';
 import authRoutes from './routes/authRoute.js';
@@ -28,13 +28,11 @@ app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/amar", amarRoutes);   
 app.use("/api/v1", storeRoutes);   
 // مفروض يكون زي ده
-// app.use('/api/v1/categories', categoryRoute);
-
-// Mount Routes
+//       /api/v1/categories'
 app.use('/api/v1/subcategories', subCategoryRoute);
-
-// Mount subcategories on category routes (nested routes)
+//   nested routes GET/POST
 app.use('/api/v1/categories/:categoryId/subcategories', subCategoryRoute);
+app.use("api/v1/brand")
 
 
 // نقطة الوصول الأساسية
@@ -64,69 +62,7 @@ process.on("unhandledRejection", (err) => {
     console.err("shuting down...")
   // exit the process in production use ejx
     process.exit(1);
-  })
+  })  
 });
 
 
-
-
-
- // front Search Bar + Searchpage
-
-// import { useState } from "react";
-
-// const SearchBar = ({ onSearch }) => {
-//   const [query, setQuery] = useState("");
-
-//   const handleSearch = () => {
-//     if (query.trim() !== "") {
-//       onSearch(query);
-//     }
-//   };
-
-//   return (
-//     <div>
-//       <input
-//         type="text"
-//         placeholder="Search categories..."
-//         value={query}
-//         onChange={(e) => setQuery(e.target.value)}
-//       />
-//       <button onClick={handleSearch}>Search</button>
-//     </div>
-//   );
-// };
-
-// export default SearchBar;
-
-
-
-// import { useState } from "react";
-// import axios from "axios";
-// import SearchBar from "./SearchBar";
-
-// const SearchPage = () => {
-//   const [categories, setCategories] = useState([]);
-
-//   const handleSearch = async (query) => {
-//     try {
-//       const { data } = await axios.get(`/api/v1/search?query=${query}`);
-//       setCategories(data.categories);
-//     } catch (error) {
-//       console.error("Search error:", error);
-//     }
-//   };
-
-//   return (
-//     <div>
-//       <SearchBar onSearch={handleSearch} />
-//       <ul>
-//         {categories.map((category) => (
-//           <li key={category._id}>{category.name}</li>
-//         ))}
-//       </ul>
-//     </div>
-//   );
-// };
-
-// export default SearchPage;
