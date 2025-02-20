@@ -5,33 +5,33 @@ import catchAsync from "../utils/catchAsync.js";
 import cloudinary from "../config/cloudinaryConfig.js";
 
 
-
 export const CreateBrand = async (req, res, next) => {
   try { 
     const { name } = req.body;
     if (!name) return next(new ApiError(400, "Brand name is required"));
-    if (!req.file) return next(new ApiError(400, "Image file is required"));
 
-    let imageUrl = "";
+    let imageUrl = ""; // يمكن أن يكون فارغًا إذا لم يتم رفع صورة
 
-    // رفع الصورة إلى Cloudinary
-    const result = await new Promise((resolve, reject) => {
-      const stream = cloudinary.uploader.upload_stream(
-        { folder: "brands" },
-        (error, result) => {
-          if (error) reject(new ApiError(500, "Error uploading image"));
-          else resolve(result);
-        }
-      );
-      stream.end(req.file.buffer);
-    });
+    if (req.file) {
+      // رفع الصورة إلى Cloudinary إذا تم رفعها
+      const result = await new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          { folder: "brands" },
+          (error, result) => {
+            if (error) reject(new ApiError(500, "Error uploading image"));
+            else resolve(result);
+          }
+        );
+        stream.end(req.file.buffer);
+      });
 
-    imageUrl = result.secure_url;
+      imageUrl = result.secure_url;
+    }
 
     const newBrand = await Brand.create({
       name,
       slug: slugify(name, { lower: true, strict: true }),
-      image: imageUrl,
+      image: imageUrl || "https://via.placeholder.com/150", // صورة افتراضية إذا لم يتم رفع صورة
     });
 
     console.log("Created Brand:", newBrand);

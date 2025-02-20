@@ -11,6 +11,7 @@ import validationMiddleware from "../middleware/validationMiddleware.js";
 import { validateDelete, validateId, validateUpdate } from "../utils/validator/validateId.js";
 
 const router = Router();
+// if any input like name id must add vaildate
 
 // ✅ إضافة علامة تجارية جديدة
 router.post("/add-brand", upload.single("image"), CreateBrand);
@@ -20,9 +21,8 @@ router.get("/brands", getBrands);
 
 // ✅ جلب علامة تجارية واحدة باستخدام الـ ID
 router.get("/brand/:id", validateId, validationMiddleware, getOneBrand);
-
 // ✅ تحديث وحذف العلامة التجارية باستخدام ID
-router
+router   
   .route("/:id")
   .put(validateUpdate, validationMiddleware, updateBrand)
   .delete(validateDelete, validationMiddleware, deleteBrand);
