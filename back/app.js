@@ -33,7 +33,7 @@ app.use("/api/v1", storeRoutes);
 app.use('/api/v1/subcategories', subCategoryRoute);
 //   nested routes GET/POST
 app.use('/api/v1/categories/:categoryId/subcategories', subCategoryRoute);
-app.use("/api/brands", brandRoute);
+app.use("/api/v1/brands", brandRoute);
 
 // نقطة الوصول الأساسية
 app.get('/', (req, res) => {

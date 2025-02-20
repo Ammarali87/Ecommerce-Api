@@ -17,13 +17,14 @@ const router = Router();
 router.post("/add-brand", upload.single("image"), CreateBrand);
 
 // ✅ جلب جميع العلامات التجارية
-router.get("/brands", getBrands);
+router.get("/getbrands", getBrands);
 
-// ✅ جلب علامة تجارية واحدة باستخدام الـ ID
-router.get("/brand/:id", validateId, validationMiddleware, getOneBrand);
-// ✅ تحديث وحذف العلامة التجارية باستخدام ID
+
 router   
-  .route("/:id")
+.route("/:id")
+// ✅ جلب علامة تجارية واحدة باستخدام الـ ID
+.get(validateId, validationMiddleware,getOneBrand)
+// ✅ تحديث وحذف العلامة التجارية باستخدام ID
   .put(validateUpdate, validationMiddleware, updateBrand)
   .delete(validateDelete, validationMiddleware, deleteBrand);
 

@@ -14,9 +14,9 @@ const nameValidation = check('name')
 
 export const getBrandValidator = [idValidation, validationMiddleware];
 export const createBrandValidator = [
-  nameValidation,
-  check('brandId').notEmpty().withMessage('Brand ID is required')
-    .isMongoId().withMessage('Invalid Brand ID format'),
+  nameValidation, // err no need to id in creation
+  // check('brandId').notEmpty().withMessage('Brand ID is required')
+// .isMongoId().withMessage('Invalid Brand ID format'),
   validationMiddleware,
 ];
 export const updateBrandValidator = [

@@ -89,7 +89,7 @@ export const deleteBrand = async (req, res, next) => {
     const brand = await Brand.findByIdAndDelete(id);
     if (!brand) return next(new ApiError(404, "Brand not found"));
 
-    res.status(200).json({ status: "success", message: "Brand deleted successfully", brand });
+    res.status(200).json({ status: "success Deleted", message: "Brand deleted successfully", brand });
   } catch (error) {
     console.error("Error Deleting Brand:", error);
     next(new ApiError(500, "Error deleting Brand"));
@@ -100,6 +100,25 @@ export const deleteBrand = async (req, res, next) => {
 export const updateBrand = catchAsync(async (req, res, next) => {
   const { id } = req.params;
   const { name } = req.body;
+ // Check if name is provided
+ if (!name  || !id) {
+  return next(new ApiError(400, "Nothing to update : name and id  is required"));
+}
+
+// First find the existing brand
+const existingBrand = await Brand.findById(id);
+if (!existingBrand) {
+  return next(new ApiError(404, "Brand not found"));
+}
+
+// Check if the new name is different from the existing name
+if (existingBrand.name === name) {
+  return res.status(400).json({ 
+    status: "fail",
+    message: "No changes needed - brand name is the same",
+    brand: existingBrand 
+  });
+}
 
   const brand = await Brand.findOneAndUpdate(
     { _id: id }, 
@@ -112,5 +131,8 @@ export const updateBrand = catchAsync(async (req, res, next) => {
 
   if (!brand) return next(new ApiError(404, "Brand not found"));
 
-  res.status(200).json({ status: "success", brand });
+  res.status(200).json({ status: "success Update", brand });
 });
+
+
+

@@ -12,7 +12,7 @@ const BrandSchema = new Schema(
       minlength: [3, "Subcategory name is too short"],
       maxlength: [50, "Subcategory name is too long"],
     },
-    img: {
+    image: {
       type: String,
     }, 
    
