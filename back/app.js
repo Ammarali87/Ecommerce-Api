@@ -6,6 +6,7 @@ import amarRoutes from './routes/amar.js';
 import authRoutes from './routes/authRoute.js';
 import storeRoutes from './routes/store.js';
 import brandRoute from './routes/brandRoute.js';
+import productRoutes from './routes/productRoute.js';
 import subCategoryRoute from './routes/subCategoryRoute.js';
 import cors from "cors";
 import ApiError from './utils/ApiError.js';
@@ -28,6 +29,7 @@ connect()
 app.use("/api/v1/auth", authRoutes);   
 app.use("/api/v1/amar", amarRoutes);   
 app.use("/api/v1", storeRoutes);   
+app.use("/api/v1/prodcuts", productRoutes);   
 // مفروض يكون زي ده
 //       /api/v1/categories'
 app.use('/api/v1/subcategories', subCategoryRoute);

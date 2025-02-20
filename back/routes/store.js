@@ -15,7 +15,8 @@ import { validateDelete, validateId, validateUpdate } from "../utils/validator/v
 const router = Router();
 
 // ✅ إضافة كاتيجوري
-router.post("/add-category", upload.single("image"), addCategory);
+router.post("/add-category",
+   upload.single("image"), addCategory);
 
 // ✅ جلب كل الكاتيجوريز
 router.get("/categories", getCategories);
