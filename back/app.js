@@ -5,6 +5,7 @@ import { connect } from './config/mongo.js';
 import amarRoutes from './routes/amar.js';
 import authRoutes from './routes/authRoute.js';
 import storeRoutes from './routes/store.js';
+import brandRoute from './routes/brandRoute.js';
 import subCategoryRoute from './routes/subCategoryRoute.js';
 import cors from "cors";
 import ApiError from './utils/ApiError.js';
