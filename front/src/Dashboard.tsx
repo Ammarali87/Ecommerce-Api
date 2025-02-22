@@ -60,7 +60,7 @@ import axios from "axios";
 
     try {
       setLoading(true);
-      const { data } = await axios.post("/api/v1/add-category", formData, {
+      const { data } = await axios.post("http://localhost:3000/api/v1/products/add-product"        , formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 

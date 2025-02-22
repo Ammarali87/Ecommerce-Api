@@ -29,7 +29,7 @@ connect()
 app.use("/api/v1/auth", authRoutes);   
 app.use("/api/v1/amar", amarRoutes);   
 app.use("/api/v1", storeRoutes);   
-app.use("/api/v1/prodcuts", productRoutes);   
+app.use("/api/v1/products", productRoutes);   
 // مفروض يكون زي ده
 //       /api/v1/categories'
 app.use('/api/v1/subcategories', subCategoryRoute);
