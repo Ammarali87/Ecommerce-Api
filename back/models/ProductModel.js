@@ -100,20 +100,38 @@ productSchema.pre(/^find/, function (next) {
   next();
 });
 
+// Remove or modify the setImageURL function
 const setImageURL = (doc) => {
+  // Remove URL modification
   if (doc.imageCover) {
-    const imageUrl = `${process.env.BASE_URL}/products/${doc.imageCover}`;
-    doc.imageCover = imageUrl;
+    doc.imageCover = doc.imageCover;
   }
+  // Keep image array handling if needed
   if (doc.images) {
     const imagesList = [];
     doc.images.forEach((image) => {
-      const imageUrl = `${process.env.BASE_URL}/products/${image}`;
-      imagesList.push(imageUrl);
+      imagesList.push(image);
     });
     doc.images = imagesList;
   }
-};
+};    
+// img with server  put your domin 
+ 
+// const setImageURL = (doc) => {
+//   if (doc.imageCover) {
+//     const imageUrl = `${process.env.BASE_URL}/products/${doc.imageCover}
+//     `;
+//     doc.imageCover = imageUrl;
+//   }
+//   if (doc.images) {
+//     const imagesList = [];
+//     doc.images.forEach((image) => {
+//       const imageUrl = `${process.env.BASE_URL}/products/${image}`;
+//       imagesList.push(imageUrl);
+//     });
+//     doc.images = imagesList;
+//   }
+// };
 // findOne, findAll and update
 productSchema.post('init', (doc) => {
   setImageURL(doc);

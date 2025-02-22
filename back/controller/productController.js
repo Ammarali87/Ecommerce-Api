@@ -5,25 +5,13 @@ import catchAsync from '../utils/catchAsync.js';
 import cloudinary from "../config/cloudinaryConfig.js";
 
 // Create new product
+// Create new product
+
+
 export const createProduct = catchAsync(async (req, res, next) => {
-  const { title, description, quantity, price, category, brand } = req.body;
+  const { title, description, quantity, price, category, brand, imageCover } = req.body;
 
-  if (!req.file) {
-    return next(new ApiError(400, "Product image is required"));
-  }
-
-  // Upload image to cloudinary
-  const result = await new Promise((resolve, reject) => {
-    const stream = cloudinary.uploader.upload_stream(
-      { folder: "products" },
-      (error, result) => {
-        if (error) reject(new ApiError(500, "Error uploading image"));
-        else resolve(result);
-      }
-    );
-    stream.end(req.file.buffer);
-  });
-
+  // Remove the image URL concatenation
   const product = await Product.create({
     title,
     slug: slugify(title, { lower: true }),
@@ -32,14 +20,111 @@ export const createProduct = catchAsync(async (req, res, next) => {
     price,
     category,
     brand,
-    imageCover: result.secure_url
+    imageCover: imageCover // Use the image URL directly
   });
 
-  res.status(201).json({
+  return res.status(201).json({
     status: 'success',
     data: product
   });
 });
+
+
+
+// export const createProduct = catchAsync(async (req, res, next) => {
+//   const { title, description, quantity, price, category, brand, imageCover } = req.body;
+
+//   // Create product with direct image URL if provided in body
+//   if (imageCover) {
+//     const product = await Product.create({
+//       title,
+//       slug: slugify(title, { lower: true }),
+//       description,
+//       quantity,
+//       price,
+//       category,
+//       brand,
+//       imageCover // Use direct URL from request body
+//     });
+
+//     return res.status(201).json({
+//       status: 'success',
+//       data: product
+//     });
+//   }
+
+//   // If no image URL provided, handle file upload
+//   if (req.file) {
+//     const result = await new Promise((resolve, reject) => {
+//       const stream = cloudinary.uploader.upload_stream(
+//         { folder: "products" },
+//         (error, result) => {
+//           if (error) reject(new ApiError(500, "Error uploading image"));
+//           else resolve(result);
+//         }
+//       );
+//       stream.end(req.file.buffer);
+//     });
+
+//     const product = await Product.create({
+//       title,
+//       slug: slugify(title, { lower: true }),
+//       description,
+//       quantity,
+//       price,
+//       category,
+//       brand,
+//       imageCover: result.secure_url
+//     });
+
+//     return res.status(201).json({
+//       status: 'success',
+//       data: product
+//     });
+//   }
+
+//   // If no image provided at all
+//   return next(new ApiError(400, "Product image is required"));
+// });
+
+
+
+
+// export const createProduct = catchAsync(async (req, res, next) => {
+//   const { title, description, quantity, price, category, brand } = req.body;
+
+//   if (!req.file) {
+//     return next(new ApiError(400, "Product image is required"));
+//   }
+
+//   // Upload image to cloudinary
+//   const result = await new Promise((resolve, reject) => {
+//     const stream = cloudinary.uploader.upload_stream(
+//       { folder: "products" },
+//       (error, result) => {
+//         if (error) reject(new ApiError(500, "Error uploading image"));
+//         else resolve(result);
+//       }
+//     );
+//     stream.end(req.file.buffer);
+//   });
+
+//   const product = await Product.create({
+//     title,
+//     slug: slugify(title, { lower: true }),
+//     description,
+//     quantity,
+//     price,
+//     category,
+//     brand,
+//     imageCover: result.secure_url
+//   });
+
+//   res.status(201).json({
+//     status: 'success',
+//     data: product
+//   });
+// });
 
 // Get all products with filtering and pagination
 export const getProducts = catchAsync(async (req, res) => {
