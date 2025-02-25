@@ -132,7 +132,9 @@ const handleSubmit = async (e: FormEvent) => {
 
         {message && (
           <div className={`p-4 mb-6 rounded-lg ${
-            message.includes("✅") ? "bg-green-50 text-green-700" : "bg-red-50 text-red-700"
+            message.includes("✅") ?
+             "bg-green-50 text-green-700" :
+              "bg-red-50 text-red-700"
           }`}>
             {message}
           </div>

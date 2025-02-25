@@ -13,6 +13,7 @@ export const addCategory = async (req, res, next) => {
     if (!name) return next(new ApiError(400, "Category name is required"));
     if (!req.file) return next(new ApiError(400, "Image file is required"));
 
+    
     let imageUrl = "";
 
     // 🔹 رفع الصورة باستخدام upload_stream

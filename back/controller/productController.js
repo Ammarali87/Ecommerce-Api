@@ -4,13 +4,13 @@ import ApiError from '../utils/ApiError.js';
 import catchAsync from '../utils/catchAsync.js';
 import cloudinary from "../config/cloudinaryConfig.js";
 
-// Create new product
-// Create new product
 
 
+
+// Create new product
 export const createProduct = catchAsync(async (req, res, next) => {
   const { title, description, quantity, price, category, brand, imageCover } = req.body;
-
+   
   // Remove the image URL concatenation
   const product = await Product.create({
     title,
@@ -20,7 +20,7 @@ export const createProduct = catchAsync(async (req, res, next) => {
     price,
     category,
     brand,
-    imageCover: imageCover // Use the image URL directly
+    imageCover // Use the image URL directly
   });
 
   return res.status(201).json({
@@ -155,8 +155,10 @@ export const getProducts = catchAsync(async (req, res) => {
 // Get single product
 export const getProduct = catchAsync(async (req, res, next) => {
   const product = await Product.findById(req.params.id)
-    .populate('reviews')
-    .populate('brand');
+    .populate({
+      path: 'category',
+      select: 'name -_id'
+    });
 
   if (!product) {
     return next(new ApiError(404, 'Product not found'));
@@ -167,6 +169,22 @@ export const getProduct = catchAsync(async (req, res, next) => {
     data: product
   });
 });
+
+
+// export const getProduct = catchAsync(async (req, res, next) => {
+//   const product = await Product.findById(req.params.id)
+//     .populate('reviews')
+//     .populate('brand');
+
+//   if (!product) {
+//     return next(new ApiError(404, 'Product not found'));
+//   }
+
+//   res.status(200).json({
+//     status: 'success',
+//     data: product
+//   });
+// });
 
 // Update product
 export const updateProduct = catchAsync(async (req, res, next) => {
