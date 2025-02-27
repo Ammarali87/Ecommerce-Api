@@ -1,5 +1,5 @@
 import { Schema, model } from 'mongoose';
-import slugify from 'slugify';
+import mongoose from 'mongoose';
 
 const categorySchema = new Schema({
   name: {
@@ -30,7 +30,8 @@ const categorySchema = new Schema({
 //   next(); //  very hard to rember next()
 // });  
 
-const Category = model('Category', categorySchema);
+const Category = mongoose.models.Category 
+|| mongoose.model('Category', categorySchema);
 
 export default Category;
 

@@ -1,4 +1,5 @@
 import Product from '../models/ProductModel.js';
+import Category from '../models/CategoryModel.js';
 import slugify from 'slugify';
 import ApiError from '../utils/ApiError.js';
 import catchAsync from '../utils/catchAsync.js';
@@ -10,7 +11,14 @@ import cloudinary from "../config/cloudinaryConfig.js";
 // Create new product
 export const createProduct = catchAsync(async (req, res, next) => {
   const { title, description, quantity, price, category, brand, imageCover } = req.body;
-   
+    
+  // move to Vaildate middware 
+  
+  //  const existCategory = await Category.findById(category);
+  //  if (!existCategory) {
+  //     return next(new ApiError(404 , "Category not Found"))  
+  // }
+
   // Remove the image URL concatenation
   const product = await Product.create({
     title,

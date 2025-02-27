@@ -10,34 +10,37 @@ import {
   updateProductRating
 } from "../controller/productController.js";
 import upload from "../middleware/uploadMiddleware.js";
-import validationMiddleware from "../middleware/validationMiddleware.js";
-import { validateId, validateUpdate, validateDelete } from "../utils/validator/validateId.js";
+
+import {
+  createProductValidator,
+  updateProductValidator,
+  deleteProductValidator,
+  getProductValidator,
+} from '../utils/validator/prodcutValidate.js';
 
 const router = Router();
 
 // Public routes
 router.get("/search", searchProducts);
 router.get("/featured", getFeaturedProducts);
-router.get("/", getProducts);
-router.get("/:id", validateId, validationMiddleware, getProduct);
+router.get("/",getProductValidator, getProducts);
+router.get("/:id", getProduct);
 
 // Protected routes (add auth middleware later)
 router.post(
-  "/add-product", 
+  "/add-product", createProductValidator,
   upload.single("imageCover"),
   createProduct
 );
 
 router
   .route("/:id")
-  .put(validateUpdate, validationMiddleware, updateProduct)
-  .delete(validateDelete, validationMiddleware, deleteProduct);
+  .put(updateProductValidator, updateProduct)
+  .delete(deleteProductValidator, deleteProduct);
 
 // Rating route
 router.patch(
   "/:id/rating",
-  validateId,
-  validationMiddleware,
   updateProductRating
 );
 

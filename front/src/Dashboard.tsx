@@ -1,6 +1,32 @@
 import { useState, ChangeEvent, FormEvent } from "react";
 import axios from "axios";
 
+// Add these interfaces after the existing interfaces
+// interface Category {
+//   _id: string;
+//   name: string;
+// }
+
+// interface Brand {
+//   _id: string;
+//   name: string;
+// }
+
+// Add these states inside your Dashboard component
+// const [categories, setCategories] = useState<Category[]>([
+//   { _id: "3454554343", name: "Electronics" },
+//   { _id: "3454554344", name: "Clothing" },
+//   { _id: "3454554345", name: "Books" },
+//   // Add more categories as needed
+// ]);
+
+// const [brands, setBrands] = useState<Brand[]>([
+//   { _id: "7454554343", name: "Apple" },
+//   { _id: "7454554344", name: "Samsung" },
+//   { _id: "7454554345", name: "Nike" },
+//   // Add more brands as needed
+// ]);
+
 interface ProductData {
   title: string;
   description: string;
@@ -189,6 +215,7 @@ const handleSubmit = async (e: FormEvent) => {
               className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500"
               required
             />
+           
             <input
               type="text"
               name="category"
@@ -274,3 +301,37 @@ const handleSubmit = async (e: FormEvent) => {
     </div>
   );
 }
+
+
+
+
+// Replace the existing category and brand inputs with these select elements
+{/* <select
+  name="category"
+  value={formData.category}
+  onChange={handleInputChange}
+  className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500"
+  required
+>
+  <option value="">Select Category</option>
+  {categories.map((category) => (
+    <option key={category._id} value={category._id}>
+      {category.name}
+    </option>
+  ))}
+</select> */}
+
+// <select
+//   name="brand"
+//   value={formData.brand}
+//   onChange={handleInputChange}
+//   className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500"
+//   required
+// >
+//   <option value="">Select Brand</option>
+//   {brands.map((brand) => (
+//     <option key={brand._id} value={brand._id}>
+//       {brand.name}
+//     </option>
+//   ))}
+// </select>
