@@ -6,8 +6,6 @@ import { Category } from "./types/element";
 
 
 
-
-
 const HomePage = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);

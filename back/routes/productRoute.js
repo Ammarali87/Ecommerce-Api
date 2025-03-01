@@ -23,7 +23,7 @@ const router = Router();
 // Public routes
 router.get("/search", searchProducts);
 router.get("/featured", getFeaturedProducts);
-router.get("/",getProductValidator, getProducts);
+router.get("/", getProducts);
 router.get("/:id", getProduct);
 
 // Protected routes (add auth middleware later)

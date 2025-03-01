@@ -5,19 +5,16 @@ import ApiError from '../utils/ApiError.js';
 import catchAsync from '../utils/catchAsync.js';
 import cloudinary from "../config/cloudinaryConfig.js";
 
-
+  // after update and Delete make if (!product) {
+    // return next(new ApiError(404, 'Product not found'));
+  // }
 
 
 // Create new product
 export const createProduct = catchAsync(async (req, res, next) => {
   const { title, description, quantity, price, category, brand, imageCover } = req.body;
-    
-  // move to Vaildate middware 
-  
-  //  const existCategory = await Category.findById(category);
-  //  if (!existCategory) {
-  //     return next(new ApiError(404 , "Category not Found"))  
-  // }
+
+  // move existCategory to Vaildate middware 
 
   // Remove the image URL concatenation
   const product = await Product.create({
@@ -30,13 +27,56 @@ export const createProduct = catchAsync(async (req, res, next) => {
     brand,
     imageCover // Use the image URL directly
   });
-
+   // optional 
+  if (!product) {
+    return next(new ApiError(404, 'Product not Created'));
+  }
   return res.status(201).json({
     status: 'success',
     data: product
   });
 });
 
+
+
+
+export const getProducts = catchAsync(async (req, res) => {
+  let { page = 1, limit = 10, sort, fields, priceMin, priceMax, ...filters } = req.query;
+
+  page = page *1 || 1;
+  limit = limit *1 || 10;
+  const skip = (page - 1) * limit;
+
+  // معالجة نطاق السعر إذا كان موجودًا
+  if (priceMin || priceMax) {
+    filters.price = {};  // intial price objet
+    if (priceMin) filters.price.$gte = priceMin *1 ; 
+    // السعر أكبر من أو يساوي priceMin
+    if (priceMax) filters.price.$lt = priceMax *1;
+      // السعر أقل من priceMax فقط
+  }
+
+  let query = Product.find(filters).skip(skip).limit(limit);
+   // لوموجودة ترتيب  ووضع ,,,,,
+  //  ?sort=price,-createdAt
+  //  query.sort("price -createdAt");
+  if (sort) query = query.sort(sort.split(",").join(" "));
+  if (fields) query = query.select(fields.split(",").join(" "));
+  // query.select("name price category");
+
+  const [products, total] = await Promise.all([
+    query,
+    Product.countDocuments(filters),
+  ]);
+
+  res.status(200).json({
+    status: "success",
+    results: products.length,
+    totalPages: Math.ceil(total / limit),
+    currentPage: page,
+    data: products,
+  });
+});
 
 
 // export const createProduct = catchAsync(async (req, res, next) => {
@@ -135,30 +175,9 @@ export const createProduct = catchAsync(async (req, res, next) => {
 // });
 
 // Get all products with filtering and pagination
-export const getProducts = catchAsync(async (req, res) => {
-  const page = parseInt(req.query.page) || 1;
-  const limit = parseInt(req.query.limit) || 10;
-  const skip = (page - 1) * limit;
 
-  const filter = {};
-  if (req.query.category) filter.category = req.query.category;
-  if (req.query.brand) filter.brand = req.query.brand;
-  if (req.query.priceMin) filter.price = { $gte: req.query.priceMin };
-  if (req.query.priceMax) filter.price = { ...filter.price, $lte: req.query.priceMax };
 
-  const [products, total] = await Promise.all([
-    Product.find(filter).skip(skip).limit(limit),
-    Product.countDocuments(filter)
-  ]);
 
-  res.status(200).json({
-    status: 'success',
-    results: products.length,
-    totalPages: Math.ceil(total / limit),
-    currentPage: page,
-    data: products
-  });
-});
 
 // Get single product
 export const getProduct = catchAsync(async (req, res, next) => {
@@ -179,27 +198,14 @@ export const getProduct = catchAsync(async (req, res, next) => {
 });
 
 
-// export const getProduct = catchAsync(async (req, res, next) => {
-//   const product = await Product.findById(req.params.id)
-//     .populate('reviews')
-//     .populate('brand');
 
-//   if (!product) {
-//     return next(new ApiError(404, 'Product not found'));
-//   }
-
-//   res.status(200).json({
-//     status: 'success',
-//     data: product
-//   });
-// });
 
 // Update product
 export const updateProduct = catchAsync(async (req, res, next) => {
   const { title } = req.body;
   if (title) {
     req.body.slug = slugify(title, { lower: true });
-  }
+  }  
 
   const product = await Product.findByIdAndUpdate(
     req.params.id,

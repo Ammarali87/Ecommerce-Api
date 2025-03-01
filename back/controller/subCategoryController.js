@@ -1,5 +1,5 @@
 import SubCategory from "../models/SubCategoriesModel.js"
-import Category from "../models/categoryModel.js"; // التحقق من وجود الفئة
+import Category from "../models/CategoryModel.js"; // التحقق من وجود الفئة
 import slugify from "slugify";
 import ApiError from "../utils/ApiError.js";
 import catchAsync from "../utils/catchAsync.js";
