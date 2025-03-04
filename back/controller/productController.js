@@ -66,7 +66,7 @@ export const getProducts = catchAsync(async (req, res) => {
   let { 
     page = 1, 
     limit = 12, 
-    sort, 
+    sort,  
     rating,
     ratingMin,
     ratingMax,
@@ -80,27 +80,31 @@ export const getProducts = catchAsync(async (req, res) => {
 
   // Build filter object
   const filterObject = { ...filters };
-
+   
   // Handle rating filters
   if (rating) {
-    // For exact rating, use a range of ±0.4 to catch nearby ratings
+    // For exact rating, use a 
+    // range of ±0.4 to catch nearby ratings
     filterObject.ratingsAverage = {
       $gte: parseFloat(rating) - 0.4,
       $lte: parseFloat(rating) + 0.4
-    };
+    }; 
   } else if (ratingMin || ratingMax) {
     filterObject.ratingsAverage = {};
     if (ratingMin) filterObject.ratingsAverage.$gte 
     = parseFloat(ratingMin);
-    if (ratingMax) filterObject.ratingsAverage.$lte = parseFloat(ratingMax);
-  }
+    if (ratingMax) filterObject.ratingsAverage.$lte  = parseFloat(ratingMax);
+  } 
 
-  // Build query
+  // Build query  
   let query = Product.find(filterObject)
     .skip(skip)
     .limit(limit)
     .populate('category', 'name -_id');
-
+    // sort most selling / most rating  
+    //   assending/dessending add(-)   
+    //  ?sort=price or -price , sort=sold =most selling  
+    // -createdAt from smallest date 
   // Add sorting
   if (sort) {
     query = query.sort(sort.replace(/,/g, ' '));
