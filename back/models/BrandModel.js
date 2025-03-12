@@ -1,26 +1,34 @@
-import {Schema ,model} from "mongoose";
+import { Schema, model } from 'mongoose';
 
-// required: [inArray] [true, "Subcategory name is required"],
-// trim true !important 
-// slug lowercase 
-const BrandSchema = new Schema(
+const brandSchema = new Schema(
   {
     name: {
       type: String,
-      required: [true, "Subcategory name is required"],
+      required: [true, 'Brand name is required'],
+      unique: true,
       trim: true,
-      minlength: [3, "Subcategory name is too short"],
-      maxlength: [50, "Subcategory name is too long"],
+      minlength: [2, 'Too short brand name'],
+      maxlength: [32, 'Too long brand name'],
     },
-    image: {
+    slug: {
       type: String,
-    }, 
-   
+      unique: true,
+      lowercase: true,
+    },
+    image: String,
   },
   { timestamps: true }
 );
 
-// ✅ إنشاء الموديل
-const Brand = model("Brand", BrandSchema);
+
+// Add virtual populate for reviews
+brandSchema.virtual('reviews', {
+  ref: 'Review',
+  foreignField: 'brand',
+  localField: '_id'
+});
+
+
+const Brand = model('Brand', brandSchema);
 
 export default Brand;

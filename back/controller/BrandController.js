@@ -1,15 +1,14 @@
 import Brand from "../models/BrandModel.js";
 import { getAll, getOne, createOne,
   updateOne, deleteOne } from './handlersFactory.js';
-import Product from '../models/productModel.js';
 
-export const getAllBrands = getAll(Product, 'Brand');
+export const getAllBrands = getAll(Brand, 'Brand');
 export const getBrand = getOne(Brand, { path: 'reviews' });
 export const createBrand = createOne(Brand);
 export const updateBrand = updateOne(Brand);
 export const deleteBrand = deleteOne(Brand);
 
-
+//  donkey  
 
 
 

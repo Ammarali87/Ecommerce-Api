@@ -21,13 +21,15 @@ const router = Router();
 router.get("/", getAllBrands);  // ✅ Changed from getBrands
 router.get("/:id", getBrandValidator, getBrand);
 
-// Protected routes
+// // Protected routes
+
 router.post(
-  "/add-Brand", 
+  "/add-brand",  // Change this to "/add-brand" (lowercase)
   createBrandValidator,
   upload.single("imageCover"),
   createBrand
 );
+
 
 router
   .route("/:id")
