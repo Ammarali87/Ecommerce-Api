@@ -14,7 +14,7 @@ export const createSubCategoryValidator = [
     .isLength({ min: 2 })
     .withMessage('Too short Subcategory name')
     .custom((val, { req }) => {
-      if (!val) return false;
+      if (!val) return false; // extra check instead of if else
       req.body.slug = slugify(val);
       return true;
     }),
@@ -29,7 +29,7 @@ export const createSubCategoryValidator = [
 export const updateSubCategoryValidator = [
   check('id').isMongoId().withMessage('Invalid Subcategory id format'),
   check('name')
-    .optional()
+    .optional() 
     .isLength({ min: 2 })
     .withMessage('Too short Subcategory name')
     .custom((val, { req }) => {

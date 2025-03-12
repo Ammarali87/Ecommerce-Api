@@ -1,32 +1,37 @@
 import { Router } from "express";
 import { 
-  CreateBrand, 
-  getOneBrand, 
-  getBrands,  
-  updateBrand, 
-  deleteBrand 
+  createBrand,
+  getAllBrands,    // ✅ Changed from getBrands
+  getBrand,
+  updateBrand,
+  deleteBrand
 } from "../controller/BrandController.js";
 import upload from "../middleware/uploadMiddleware.js";
-import validationMiddleware from "../middleware/validationMiddleware.js";
-import { validateDelete, validateId, validateUpdate } from "../utils/validator/validateId.js";
+
+import {
+  createBrandValidator,
+  updateBrandValidator,
+  deleteBrandValidator,
+  getBrandValidator,
+} from '../utils/validator/brandValidator.js';
 
 const router = Router();
-// if any input like name id must add vaildate
 
-// ✅ إضافة علامة تجارية جديدة
-router.post("/add-brand", upload.single("image"), CreateBrand);
+// Public routes
+router.get("/", getAllBrands);  // ✅ Changed from getBrands
+router.get("/:id", getBrandValidator, getBrand);
 
-// ✅ جلب جميع العلامات التجارية
-router.get("/getbrands", getBrands);
+// Protected routes
+router.post(
+  "/add-Brand", 
+  createBrandValidator,
+  upload.single("imageCover"),
+  createBrand
+);
 
-
-router   
-.route("/:id")
-// ✅ جلب علامة تجارية واحدة باستخدام الـ ID
-.get(validateId, validationMiddleware,getOneBrand)
-// ✅ تحديث وحذف العلامة التجارية باستخدام ID
-  .put(validateUpdate, validationMiddleware, updateBrand)
-  .delete(validateDelete, validationMiddleware, deleteBrand);
+router
+  .route("/:id")
+  .put(updateBrandValidator, updateBrand)
+  .delete(deleteBrandValidator, deleteBrand);
 
 export default router;
-

@@ -1,12 +1,12 @@
 import { Router } from "express";
 import { 
-  addCategory, 
-  getOneCategory, 
-  getCategories, 
-  searchCategories, 
-  theFuzzySearch, 
+  createCategory,
+  getAllCategories,    // ✅ Changed from getProducts
+  getCategory,
   updateCategory, 
   deleteCategory 
+  // searchCategories, 
+  // theFuzzySearch, 
 } from "../controller/storeController.js";
 import upload from "../middleware/uploadMiddleware.js";
 import validationMiddleware from "../middleware/validationMiddleware.js";
@@ -16,17 +16,17 @@ const router = Router();
 
 // ✅ إضافة كاتيجوري
 router.post("/add-category",
-   upload.single("image"), addCategory);
+   upload.single("image"), createCategory);
 
 // ✅ جلب كل الكاتيجوريز
-router.get("/categories", getCategories);
+router.get("/categories", getAllCategories);
 
 // ✅ جلب كاتيجوري واحد عن طريق الـ ID
-router.get("/category/:id", validateId, validationMiddleware, getOneCategory);
+router.get("/category/:id", validateId, validationMiddleware, getCategory);
 
 // ✅ البحث
-router.get("/search", searchCategories);
-router.get("/fuzzy-search", theFuzzySearch);
+// router.get("/search", searchCategories);
+// router.get("/fuzzy-search", theFuzzySearch);
 
 // ✅ تحديث وحذف كاتيجوري باستخدام ID
 router

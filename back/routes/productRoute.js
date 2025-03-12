@@ -1,13 +1,10 @@
 import { Router } from "express";
 import { 
   createProduct,
-  getProducts,
+  getAllProducts,    // ✅ Changed from getProducts
   getProduct,
   updateProduct,
-  deleteProduct,
-  searchProducts,
-  getFeaturedProducts,
-  updateProductRating
+  deleteProduct
 } from "../controller/productController.js";
 import upload from "../middleware/uploadMiddleware.js";
 
@@ -21,14 +18,13 @@ import {
 const router = Router();
 
 // Public routes
-router.get("/search", searchProducts);
-router.get("/featured", getFeaturedProducts);
-router.get("/", getProducts);
-router.get("/:id", getProduct);
+router.get("/", getAllProducts);  // ✅ Changed from getProducts
+router.get("/:id", getProductValidator, getProduct);
 
-// Protected routes (add auth middleware later)
+// Protected routes
 router.post(
-  "/add-product", createProductValidator,
+  "/add-product", 
+  createProductValidator,
   upload.single("imageCover"),
   createProduct
 );
@@ -37,11 +33,5 @@ router
   .route("/:id")
   .put(updateProductValidator, updateProduct)
   .delete(deleteProductValidator, deleteProduct);
-
-// Rating route
-router.patch(
-  "/:id/rating",
-  updateProductRating
-);
 
 export default router;

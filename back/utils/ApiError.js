@@ -1,6 +1,7 @@
 // 400 fail 500 error
 // ApiError → لإنشاء الأخطاء المخصصة
 //errorMiddleware → يعالج جميع الأخطا
+
 class ApiError extends Error {
   constructor(statusCode, message) {
     super(message);
@@ -11,7 +12,6 @@ class ApiError extends Error {
     Error.captureStackTrace(this, this.constructor);
   }
 }
-
 
 export default ApiError;
 

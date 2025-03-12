@@ -1,4 +1,5 @@
 import {Schema ,model} from "mongoose";
+import './ReviewModel.js';
 
 // required: [inArray] [true, "Subcategory name is required"],
 // trim true !important 
@@ -28,6 +29,20 @@ const subCategorySchema = new Schema(
 // Add compound unique index for name and category
 subCategorySchema.index({ category: 1, name: 1 }, { unique: true });
 
+subCategorySchema.virtual('reviews', {
+  ref: 'Review',
+  foreignField: 'product',
+  localField: '_id',
+});
+
+// Mongoose query middleware
+subCategorySchema.pre(/^find/, function (next) {
+  this.populate({
+    path: 'category',
+    select: 'name -_id',
+  });
+  next();
+});
 // ✅ إنشاء الموديل
 const SubCategory = model("SubCategory", subCategorySchema);
 

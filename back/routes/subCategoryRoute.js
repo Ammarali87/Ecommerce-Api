@@ -1,8 +1,8 @@
 import { Router } from 'express';
-import {
+import { 
   createSubCategory,
   getSubCategory,
-  getSubCategories,
+  getAllSubCategories,
   updateSubCategory,
   deleteSubCategory,
 } from '../controller/subCategoryController.js';
@@ -20,7 +20,7 @@ const router = Router({ mergeParams: true });
 // GET/POST /api/v1/categories/:categoryId/subcategories
 router.route('/')
   .post(createSubCategoryValidator, createSubCategory)
-  .get(getSubCategories);
+  .get(getAllSubCategories);
 
   router.route('/:id')
   .get(getSubCategoryValidator, getSubCategory)

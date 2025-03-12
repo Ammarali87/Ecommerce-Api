@@ -1,5 +1,6 @@
 import { Schema, model } from 'mongoose';
 import './ReviewModel.js';
+//  why need to  import Review Model
 
 const productSchema = new Schema(
   {
@@ -65,12 +66,8 @@ const productSchema = new Schema(
       min: [1, 'Rating must be above or equal 1.0'],
       max: [5, 'Rating must be below or equal 5.0'],
       // Remove default value or set it to null
-      default: null,
+      default: 4.5,
       set: (val) => Math.round(val * 10) / 10
-    },
-    ratingsQuantity: {
-      type: Number,
-      default: 0,
     },
     ratingsQuantity: {
       type: Number,
@@ -83,7 +80,7 @@ const productSchema = new Schema(
     toObject: { virtuals: true },
   }
 );
-
+ // what is 
 productSchema.virtual('reviews', {
   ref: 'Review',
   foreignField: 'product',
@@ -105,9 +102,11 @@ const setImageURL = (doc) => {
     doc.imageCover = `${process.env.BASE_URL}/products/${doc.imageCover}`;
   }
   if (doc.images) {
-    doc.images = doc.images.map((image) => `${process.env.BASE_URL}/products/${image}`);
+    doc.images = doc.images.map((image) => 
+      `${process.env.BASE_URL}/products/${image}`);
   }
 };
+
 
 // Apply image URL formatting on query results
 productSchema.post('init', (doc) => setImageURL(doc));
