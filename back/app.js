@@ -50,7 +50,7 @@ app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 
 
    //  Security middleware
-// sql injection 
+// sql/mongo injection 
 app.use(mongoSanitize());
 // protect comment /search/login input
 app.use(xss());
