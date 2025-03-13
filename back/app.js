@@ -24,6 +24,7 @@ dotenv.config();
 const app = express();
 
 // Security Middleware
+ // protect headers
 app.use(helmet());
 app.use(cors());
 app.options('*', cors());
@@ -35,28 +36,36 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 // Limit requests from same IP
+// DDOS ATTACK  
 const limiter = rateLimit({
   max: 100,
   windowMs: 60 * 60 * 1000, // 1 hour in mili second
   message: 'Too many requests from this IP, please try again in an hour!'
-});
+}); 
 app.use('/api', limiter);
-  app.use  
+
 // Body parser
 app.use(express.json({ limit: '10kb' }));
-app.use(express.urlencoded({ extended: true,
-   limit: '10kb' }));
-      
-// Security middleware
+app.use(express.urlencoded({ extended: true, limit: '10kb' }));
+
+
+   //  Security middleware
+// sql injection 
 app.use(mongoSanitize());
+// protect comment /search/login input
 app.use(xss());
+// prevent parameter pollution 
+// only take Array whatelist:["price","sold"]
+// تمنع تمرير نفس المعامل أكثر من مرة.
+// تضمن أن كل معامل يتم معالجته مرة واحدة فقط.
+// القائمة البيضاء (whitelist) تسمح ببعض المعاملات التي قد تحتاج إلى قيم متعددة.
 app.use(hpp({
   whitelist: ['price', 
     'sold', 'quantity', 
     'ratingsAverage',
      'ratingsQuantity']
-}));
-app.use(compression());
+})); 
+app.use(compression()); // compress all resonses
 
 // Handle favicon
 app.get('/favicon.ico', (req, res) => res.status(204));
@@ -76,12 +85,12 @@ app.use("/api/v1/brands", brandRoute);
 // Base route
 app.get('/', (req, res) => {
   res.send("Hello World");
-});
+});  
 
 // Handle 404 routes
 app.all("*", (req, res, next) => {
    next(new ApiError(400, `Route not found: ${req.originalUrl}`));
-});    
+});   
 
 // Global error handler
 app.use(errorMiddleware);
