@@ -1,6 +1,6 @@
 import errorMiddleware from './middleware/errorMiddleware.js';
 import dotenv from 'dotenv';
-import express, { urlencoded } from 'express';
+import express from 'express';
 import { connect } from './config/mongo.js';
 import amarRoutes from './routes/amar.js';
 import authRoutes from './routes/authRoute.js';
