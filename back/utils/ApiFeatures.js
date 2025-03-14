@@ -1,31 +1,57 @@
+//  class name start with Cap
+// add this to every thing
+// no this in new var from var just one this 
+
+// the use of class 
+// const features = new ApiFeatures(Model.find()
+// , req.query)     starit with search 
+//   .search()     // First apply search
+//   .filter()     // Then apply filters
+//   .sort()       // Sort results
+//   .limit()// Select specific fields
+//   .paginate(totalCount); // Finally paginate
+// can remove {} from if if one line 
+
+
+
 class ApiFeatures {
   constructor(query, queryString) {
+    // queryString == paramter
+    // query  ready to find() 
     this.query = query;
     this.queryString = queryString;
+  }
+
+  search() {
+    if (this.queryString.search) {
+      // here can make fuzzy search 
+      const searchObj = {
+        // like ?  take logic 
+        $or: [
+          { title: {
+             $regex: this.queryString.search,
+              $options: 'i' } },
+          { description: { $regex: this.queryString.search, $options: 'i' } }
+        ]
+      };
+      this.query = this.query.find(searchObj);
+    }  
+    return this;
   }
 
   filter() {
     const queryObj = { ...this.queryString };
     const excludedFields = ['page', 'sort', 'limit', 'field', 'search'];
     excludedFields.forEach(el => delete queryObj[el]);
-
-    // Handle filters
+      // can make without exclude const 
     const filterObject = { ...queryObj };
-
-    // Add keyword search
-    if (this.queryString.search) {
-      filterObject.$or = [
-        { title: { $regex: this.queryString.search, $options: 'i' } },
-        { description: { $regex: this.queryString.search, $options: 'i' } }
-      ];
-    }
 
     // Handle rating filters
     if (this.queryString.rating) {
       filterObject.ratingsAverage = {
         $gte: parseFloat(this.queryString.rating) - 0.4,
         $lte: parseFloat(this.queryString.rating) + 0.4
-      };
+      }; 
     } else if (this.queryString.ratingMin || this.queryString.ratingMax) {
       filterObject.ratingsAverage = {};
       if (this.queryString.ratingMin) filterObject.ratingsAverage.$gte = parseFloat(this.queryString.ratingMin);
@@ -35,25 +61,26 @@ class ApiFeatures {
     // Handle price filters
     if (this.queryString.priceMin || this.queryString.priceMax) {
       filterObject.price = {};
-      if (this.queryString.priceMin) filterObject.price.$gte = parseFloat(this.queryString.priceMin);
-      if (this.queryString.priceMax) filterObject.price.$lte = parseFloat(this.queryString.priceMax);
+      filterObject.price.$gte = parseFloat(this.queryString.priceMin) || 0;
+      filterObject.price.$lte = parseFloat(this.queryString.priceMax) || 340; // Default max price
     }
 
     this.query = this.query.find(filterObject);
-    return this; // return object to chain methods
+    return this;
   }
 
-  sort() {
+  sort() { 
     if (this.queryString.sort) {
-      const sortBy = this.queryString.sort.replace(/,/g, ' ');
+      const sortBy = 
+      this.queryString.sort.replace(/,/g, ' ');
       this.query = this.query.sort(sortBy);
-    } else {
+    } else { 
       this.query = this.query.sort('-createdAt');
     }
     return this;
   }
 
-  limitFields() {
+  limit() {
     if (this.queryString.field) {
       const fields = this.queryString.field.replace(/,/g, ' ');
       this.query = this.query.select(fields);
@@ -69,36 +96,23 @@ class ApiFeatures {
     const skip = (page - 1) * limit;
     const endIndex = page * limit;
 
-    const pagination = {};
-    pagination.currentPage = page;
-    pagination.limit = limit;
-    pagination.numOfPages = Math.ceil(countDocuments / limit);
+  const pagination = {
+      currentPage: page,
+      limit,
+      numOfPages: Math.ceil(countDocuments / limit)
+    };
 
-    // next page
     if (endIndex < countDocuments) {
       pagination.next = page + 1;
     }
-    // prev page
+
     if (skip > 0) {
       pagination.prev = page - 1;
     }
 
     this.query = this.query.skip(skip).limit(limit);
-    this.paginationReslut = pagination; // This is the property name used
+    this.paginationResult = pagination;
 
-    return this;
-  }
-
-  search(modelName) {
-    if (this.queryString.search) {
-      const searchObj = {
-        $or: [
-          { title: { $regex: this.queryString.search, $options: 'i' } },
-          { description: { $regex: this.queryString.search, $options: 'i' } }
-        ]
-      };
-      this.query = this.query.find(searchObj);
-    }
     return this;
   }
 }

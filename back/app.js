@@ -28,6 +28,20 @@ const app = express();
 app.use(helmet());
 app.use(cors());
 app.options('*', cors());
+app.use(cookieParser());
+const csrfProtection = csrf({ cookie: true });
+app.use(csrfProtection);
+
+// Route to get CSRF token
+app.get("/csrf-token", (req, res) => {
+  res.json({ csrfToken: req.csrfToken() });
+}); 
+ 
+// example of route we protected
+app.post("/submit", (req, res) => {
+  res.send("Form submitted successfully!");
+});
+
 
 // Development logging
 if (process.env.NODE_ENV === 'development') {
@@ -74,23 +88,29 @@ app.get('/favicon.ico', (req, res) => res.status(204));
 connect();
 
 // Routes
-app.use("/api/v1/auth", authRoutes);   
-app.use("/api/v1/amar", amarRoutes);   
-app.use("/api/v1", storeRoutes);   
-app.use("/api/v1/products", productRoutes);   
-app.use('/api/v1/subcategories', subCategoryRoute);
-app.use('/api/v1/categories/:categoryId/subcategories', subCategoryRoute);
-app.use("/api/v1/brands", brandRoute);
+const apiRouter = express.Router();
+app.use("/api/v1", apiRouter);
+
+// Updated routes without /api/v1 prefix
+apiRouter.use("/auth", authRoutes);   
+apiRouter.use("/amar", amarRoutes);   
+apiRouter.use("/", storeRoutes);   
+apiRouter.use("/products", productRoutes);   
+apiRouter.use('/subcategories', subCategoryRoute);
+apiRouter.use('/categories/:categoryId/subcategories', subCategoryRoute);
+apiRouter.use("/brands", brandRoute);
+
 
 // Base route
 app.get('/', (req, res) => {
   res.send("Hello World");
-});  
+});
 
 // Handle 404 routes
 app.all("*", (req, res, next) => {
    next(new ApiError(400, `Route not found: ${req.originalUrl}`));
 });   
+
 
 // Global error handler
 app.use(errorMiddleware);
@@ -99,148 +119,52 @@ export default app;
 
 
 
+//  in front 
 
-// import errorMiddleware from './middleware/errorMiddleware.js';
-// import dotenv from 'dotenv';
-// import express, { urlencoded } from 'express';
-// import { connect } from './config/mongo.js';
-// import amarRoutes from './routes/amar.js';
-// import authRoutes from './routes/authRoute.js';
-// import storeRoutes from './routes/store.js';
-// import brandRoute from './routes/brandRoute.js';
-// import productRoutes from './routes/productRoute.js';
-// import subCategoryRoute from './routes/subCategoryRoute.js';
-// import cors from "cors";
-// import ApiError from './utils/ApiError.js';
+import axios from "axios";
+ // remove 
+async function getCsrfToken() {
+  const res = await axios.get("http://localhost:3000/csrf-token", {
+    withCredentials: true, // ضروري لإرسال واستقبال الـ Cookies
+  });
+  return res.data.csrfToken;
+}
 
-// dotenv.config(); // 📌 يجب أن يكون في البداية قبل استخدام أي متغير بيئي
+async function submitForm(data) {
+  const csrfToken = await getCsrfToken();
 
-// const app = express();
+  await axios.post("http://localhost:3000/submit", 
+    data, {
+    headers: {
+      "Content-Type": "application/json", // optional
+      "CSRF-Token": csrfToken, // إرسال التوكن مع الطلب
+    },
+    withCredentials: true, // ضروري لو السيرفر بيستخدم الـ Cookies
+  });
+}
 
-// app.use(express.json());
-// app.use(express.urlencoded({ extended: true }));
-// app.use(cors()); 
-
-// app.get('/favicon.ico', (req, res) =>
-//    res.status(204));
-
-// // الاتصال بقاعدة البيانات
-// connect()
-
-// // استخدام المسارات
-// app.use("/api/v1/auth", authRoutes);   
-// app.use("/api/v1/amar", amarRoutes);   
-// app.use("/api/v1", storeRoutes);   
-// app.use("/api/v1/products", productRoutes);   
-// // مفروض يكون زي ده
-// //       /api/v1/categories'
-// app.use('/api/v1/subcategories', subCategoryRoute);
-// //   nested routes GET/POST
-// app.use('/api/v1/categories/:categoryId/subcategories', subCategoryRoute);
-// app.use("/api/v1/brands", brandRoute);
-
-// // نقطة الوصول الأساسية
-// app.get('/', (req, res) => {
-//   res.send("Hello donkey World");
-// });
-
-// // إذا حد حاول يزور مسار غير موجود، هيرجع 
-// // JSON زي ده:
-// app.all("*", (req, res, next) => {
-//    next(new ApiError(400 , "Route not Found "+req.originalUrl)); // pass to global error function
-// });    
-
-// app.use(errorMiddleware); // Handles all errors
+ 
 
 
+// بدل ما تضيف withCredentials: true في كل طلب، ممكن تضبط Axios افتراضيًا:
 
-// const PORT = process.env.PORT || 4000;
-// const server = app.listen(PORT, () => {
-//   console.log(`Server started at http://localhost:${PORT}`);
-// });
-    
-// // any error not stop the server in promise
-// // handle error outside express
-// process.on("unhandledRejection", (err) => {
-//   console.log(`Unhandled Rejection: ${err.message} |  ${err.name}`);
-//   console.log(err.stack);
-//   server.close(()=>{
-//     console.err("shuting down...")
-//   // exit the process in production use ejx
-//     process.exit(1);
-//   })  
-// });
+const axiosInstance = axios.create({
+  baseURL: "http://localhost:3000",
+  withCredentials: true, // تفعيل الكوكيز لكل الطلبات
+});
 
+// الحصول على التوكن
+async function getCsrfToken() {
+  const res = await axiosInstance.get("/csrf-token");
+  return res.data.csrfToken;
+} 
 
-
-
-// // import errorMiddleware from './middleware/errorMiddleware.js'
-// // import dotenv from 'dotenv';
-// // import express, { urlencoded } from 'express';
-// // import { connect } from './config/mongo.js';
-// // import amarRoutes from './routes/amar.js';
-// // import authRoutes from './routes/authRoute.js';
-// // import storeRoutes from './routes/store.js';
-// // import brandRoute from './routes/brandRoute.js';
-// // import productRoutes from './routes/productRoute.js';
-// // import subCategoryRoute from './routes/subCategoryRoute.js';
-// // import cors from "cors";
-// // import ApiError from './utils/ApiError.js';
-
-// // dotenv.config(); // 📌 يجب أن يكون في البداية قبل استخدام أي متغير بيئي
-
-// // const app = express();
-
-// // app.use(express.json());
-// // app.use(express.urlencoded({ extended: true }));
-// // app.use(cors()); 
-
-// // app.get('/favicon.ico', (req, res) =>
-// //    res.status(204));
-
-// // // الاتصال بقاعدة البيانات
-// // connect()
-
-// // // استخدام المسارات
-// // app.use("/api/v1/auth", authRoutes);   
-// // app.use("/api/v1/amar", amarRoutes);   
-// // app.use("/api/v1", storeRoutes);   
-// // app.use("/api/v1/products", productRoutes);   
-// // // مفروض يكون زي ده
-// // //       /api/v1/categories'
-// // app.use('/api/v1/subcategories', subCategoryRoute);
-// // //   nested routes GET/POST
-// // app.use('/api/v1/categories/:categoryId/subcategories', subCategoryRoute);
-// // app.use("/api/v1/brands", brandRoute);
-
-// // // نقطة الوصول الأساسية
-// // app.get('/', (req, res) => {
-// //   res.send("Hello donkey World");
-// // });
-
-// // // إذا حد حاول يزور مسار غير موجود، هيرجع 
-// // // JSON زي ده:
-// // app.all("*", (req, res, next) => {
-// //    next(new ApiError(400 , "Route not Found "+req.originalUrl)); // pass to global error function
-// // });    
-
-// // app.use(errorMiddleware); // Handles all errors
-
-// // const PORT = process.env.PORT || 4000;
-// // const server = app.listen(PORT, () => {
-// //   console.log(`Server started at http://localhost:${PORT}`);
-// // });
-    
-// // // any error not stop the server in promise
-// // // handle error outside express
-// // process.on("unhandledRejection", (err) => {
-// //   console.log(`Unhandled Rejection: ${err.message} |  ${err.name}`);
-// //   console.log(err.stack);
-// //   server.close(()=>{
-// //     console.err("shuting down...")
-// //   // exit the process in production use ejx
-// //     process.exit(1);
-// //   })  
-// // });
-
-
+// إرسال البيانات
+// send token in headers 
+// يجبر الكلاينت على طلبه وإرساله يدويًا،
+async function submitForm(data) {
+  const csrfToken = await getCsrfToken();
+  await axiosInstance.post("/submit", data, {
+    headers: { "CSRF-Token": csrfToken },
+  });
+}   
