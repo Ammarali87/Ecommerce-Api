@@ -8,6 +8,8 @@ import mongoSanitize from 'express-mongo-sanitize';
 import xss from 'xss-clean';
 import hpp from 'hpp';
 import rateLimit from 'express-rate-limit';
+import cookieParser from "cookie-parser";
+import csrf from "csurf"; // Add this import
 
 import errorMiddleware from './middleware/errorMiddleware.js';
 import { connect } from './config/mongo.js';
@@ -27,8 +29,15 @@ const app = express();
  // protect headers
 app.use(helmet());
 app.use(cors());
+// why and what happen without 
+app.use(cors({
+  origin: 'http://localhost:3000',
+  credentials: true
+}));
+
 app.options('*', cors());
 app.use(cookieParser());
+// app.use(cookieParser(process.env.COOKIE_SECRET || 'your-secret-key'));
 const csrfProtection = csrf({ cookie: true });
 app.use(csrfProtection);
 
@@ -122,26 +131,26 @@ export default app;
 //  in front 
 
 import axios from "axios";
- // remove 
-async function getCsrfToken() {
-  const res = await axios.get("http://localhost:3000/csrf-token", {
-    withCredentials: true, // ضروري لإرسال واستقبال الـ Cookies
-  });
-  return res.data.csrfToken;
-}
+//  // remove 
+// async function getCsrfToken() {
+//   const res = await axios.get("http://localhost:3000/csrf-token", {
+//     withCredentials: true, // ضروري لإرسال واستقبال الـ Cookies
+//   });
+//   return res.data.csrfToken;
+// }
 
-async function submitForm(data) {
-  const csrfToken = await getCsrfToken();
+// async function submitForm(data) {
+//   const csrfToken = await getCsrfToken();
 
-  await axios.post("http://localhost:3000/submit", 
-    data, {
-    headers: {
-      "Content-Type": "application/json", // optional
-      "CSRF-Token": csrfToken, // إرسال التوكن مع الطلب
-    },
-    withCredentials: true, // ضروري لو السيرفر بيستخدم الـ Cookies
-  });
-}
+//   await axios.post("http://localhost:3000/submit", 
+//     data, {
+//     headers: {
+//       "Content-Type": "application/json", // optional
+//       "CSRF-Token": csrfToken, // إرسال التوكن مع الطلب
+//     },
+//     withCredentials: true, // ضروري لو السيرفر بيستخدم الـ Cookies
+//   });
+// }
 
  
 
