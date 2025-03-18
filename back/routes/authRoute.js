@@ -1,33 +1,46 @@
 import { Router } from 'express';
+import { check } from 'express-validator';
+import validationMiddleware from '../middleware/validationMiddleware.js';
 import { 
   signup, 
-  login, 
-  logout, 
-  getAllUsers, 
-  getUser,
-  requestVerification,
+  login,
+  logout,
   verifyEmail,
   forgotPassword,
-  resetPassword 
+  resetPassword
 } from '../controller/authController.js';
 
 const router = Router();
 
-// Auth routes
-router.post('/signup', signup);
+// Validation rules
+const signupValidation = [
+  check('name').trim().notEmpty().withMessage('Name is required'),
+  check('email').isEmail().withMessage('Please provide a valid email'),
+  check('password')
+    .isLength({ min: 6 })
+    .withMessage('Password must be at least 6 characters long'),
+  validationMiddleware
+];
+
+const resetPasswordValidation = [
+  check('email').isEmail().withMessage('Please provide a valid email'),
+  check('code').notEmpty().withMessage('Verification code is required'),
+  check('newPassword')
+    .isLength({ min: 6 })
+    .withMessage('Password must be at least 6 characters long'),
+  validationMiddleware
+];
+
+// Auth routes with validation
+router.post('/signup', signupValidation, signup);
 router.post('/login', login);
 router.get('/logout', logout);
 
-// Verification routes
-router.post('/verify/request', requestVerification);
-router.get('/verify/:token', verifyEmail);
+// Email verification
+router.post('/verify-email', verifyEmail);
 
-// Password reset routes
-router.post('/password/forgot', forgotPassword);
-router.patch('/password/reset/:token', resetPassword);
-
-// User routes
-router.get('/users', getAllUsers);
-router.get('/users/:id', getUser);
+// Password reset
+router.post('/forgot-password', forgotPassword);
+router.post('/reset-password', resetPasswordValidation, resetPassword);
 
 export default router;

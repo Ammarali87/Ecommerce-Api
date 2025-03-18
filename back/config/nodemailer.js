@@ -1,29 +1,31 @@
 import nodemailer from 'nodemailer';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 // Create transporter
 const transporter = nodemailer.createTransport({
-  service: 'gmail',
+  host: 'smtp.gmail.com',
+  port: 587,
+  secure: false, // true for 465, false for other ports
   auth: {
     user: process.env.EMAIL_USERNAME,
-    pass: process.env.EMAIL_PASSWORD // Use app-specific password
+    pass: process.env.EMAIL_APP_PASSWORD // Gmail App Password
   }
 });
 
 // Email sending function
 export const sendEmail = async (options) => {
   try {
-    // Create email options
     const mailOptions = {
-      from: '"Your Store" <your@email.com>',
+      from: `"${process.env.EMAIL_FROM_NAME || 'Your Store'}" <${process.env.EMAIL_USERNAME}>`,
       to: options.email,
       subject: options.subject,
-      text: options.message,
-      html: options.html // Optional HTML version
+      html: options.html
     };
 
-    // Send email
     const info = await transporter.sendMail(mailOptions);
-    console.log('Email sent: ', info.messageId);
+    console.log('Email sent:', info.messageId);
     return info;
   } catch (error) {
     console.error('Email error:', error);
@@ -31,38 +33,44 @@ export const sendEmail = async (options) => {
   }
 };
 
-// Example usage for password reset
+// Template for verification code email
+export const sendVerificationEmail = async (email, code) => {
+  await sendEmail({
+    email,
+    subject: 'Email Verification Code',
+    html: `
+      <div style="max-width: 600px; margin: 0 auto; padding: 20px; font-family: Arial, sans-serif;">
+        <h2 style="color: #333; text-align: center;">Verify Your Email</h2>
+        <div style="background-color: #f8f8f8; border-radius: 5px; padding: 20px; text-align: center;">
+          <p style="font-size: 16px; color: #666;">Your verification code is:</p>
+          <h1 style="color: #4CAF50; letter-spacing: 2px; font-size: 32px; margin: 20px 0;">${code}</h1>
+          <p style="color: #999; font-size: 14px;">This code will expire in 10 minutes</p>
+        </div>
+        <p style="color: #666; margin-top: 20px; text-align: center;">
+          If you didn't request this code, please ignore this email.
+        </p>
+      </div>
+    `
+  });
+};
 
-export const sendPasswordResetEmail = async (user, resetToken) => {
-    try {
-      const resetURL = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
-      
-      await sendEmail({
-        email: user.email,
-        subject: 'Password Reset Request',
-        message: `Reset your password at: ${resetURL}`,
-        html: `
-          <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-            <h1 style="color: #333; text-align: center;">Password Reset</h1>
-            <p>Hi ${user.name},</p>
-            <p>Please click the button below to reset your password:</p>
-            <div style="text-align: center; margin: 30px 0;">
-              <a 
-                href="${resetURL}"
-                style="background: #4CAF50; color: white; padding: 12px 30px; 
-                       text-decoration: none; border-radius: 5px; display: inline-block;"
-              >
-                Reset Password
-              </a>
-            </div>
-            <p style="color: #666; font-size: 14px;">
-              If you didn't request this, please ignore this email.
-              This link will expire in 1 hour.
-            </p>
-          </div>
-        `
-      });
-    } catch (error) {
-      throw new Error('Error sending password reset email');
-    }
-  };
+// Template for password reset code email
+export const sendPasswordResetCode = async (email, code) => {
+  await sendEmail({
+    email,
+    subject: 'Password Reset Code',
+    html: `
+      <div style="max-width: 600px; margin: 0 auto; padding: 20px; font-family: Arial, sans-serif;">
+        <h2 style="color: #333; text-align: center;">Reset Your Password</h2>
+        <div style="background-color: #f8f8f8; border-radius: 5px; padding: 20px; text-align: center;">
+          <p style="font-size: 16px; color: #666;">Your password reset code is:</p>
+          <h1 style="color: #4CAF50; letter-spacing: 2px; font-size: 32px; margin: 20px 0;">${code}</h1>
+          <p style="color: #999; font-size: 14px;">This code will expire in 10 minutes</p>
+        </div>
+        <p style="color: #666; margin-top: 20px; text-align: center;">
+          If you didn't request this code, please ignore this email.
+        </p>
+      </div>
+    `
+  });
+};
