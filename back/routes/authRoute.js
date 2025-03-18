@@ -7,12 +7,27 @@ import {
   logout,
   verifyEmail,
   forgotPassword,
-  resetPassword
+  resetPassword,
+  getAllUsers,    // Add these new imports
+  getUser,
+  updateUser,
+  deleteUser
 } from '../controller/authController.js';
 
 const router = Router();
 
-// Validation rules
+// Validation rules for user operations
+const userUpdateValidation = [
+  check('name').optional().trim().notEmpty().withMessage('Name cannot be empty'),
+  check('email').optional().isEmail().withMessage('Please provide a valid email'),
+  check('password')
+    .optional()
+    .isLength({ min: 6 })
+    .withMessage('Password must be at least 6 characters long'),
+  validationMiddleware
+];
+
+// Existing validation rules
 const signupValidation = [
   check('name').trim().notEmpty().withMessage('Name is required'),
   check('email').isEmail().withMessage('Please provide a valid email'),
@@ -36,11 +51,15 @@ router.post('/signup', signupValidation, signup);
 router.post('/login', login);
 router.get('/logout', logout);
 
-// Email verification
+// Email verification and password reset
 router.post('/verify-email', verifyEmail);
-
-// Password reset
 router.post('/forgot-password', forgotPassword);
 router.post('/reset-password', resetPasswordValidation, resetPassword);
+
+// User management routes
+router.get('/users', getAllUsers);
+router.get('/users/:id', getUser);
+router.patch('/users/:id', userUpdateValidation, updateUser);
+router.delete('/users/:id', deleteUser);
 
 export default router;
