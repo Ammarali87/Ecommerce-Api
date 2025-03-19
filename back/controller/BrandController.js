@@ -8,8 +8,6 @@ export const createBrand = createOne(Brand);
 export const updateBrand = updateOne(Brand);
 export const deleteBrand = deleteOne(Brand);
 
-//  donkey  
-
 
 
 

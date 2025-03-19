@@ -3,7 +3,7 @@ import { User } from '../models/userModel.js';
 import { sendEmail } from '../config/nodemailer.js';
 import jwt from 'jsonwebtoken';
 
-
+    
 // Function to generate JWT
 const signToken = (id) => {
     return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '1h' });
@@ -77,7 +77,6 @@ export async function login(req, res) {
         });
     }
 }
-
 
 
 
@@ -318,7 +317,6 @@ export async function deleteUser(req, res) {
 }
 
 
-  
 // // Add rate limiting for login attempts
 // export async function login(req, res) {
 //   try {
@@ -398,7 +396,8 @@ export async function forgotPassword(req, res) {
     user.resetPasswordCode = {
       code: resetCode,
       expiresAt: Date.now() + 10 * 60 * 1000
-    };    
+    };        
+
     await user.save();
 
     await sendEmail({
@@ -433,59 +432,19 @@ export async function forgotPassword(req, res) {
 
 
 
-// Verify email with code
-export async function verifyEmail(req, res) {
-  try {
-    const { email, code } = req.body;
-
-    const user = await User.findOne({
-      email,
-      'verificationCode.code': code,
-      'verificationCode.expiresAt': { $gt: Date.now() }
-    });
-
-    if (!user) {
-      return res.status(400).json({
-        status: 'fail',
-        message: 'Invalid or expired verification code'
-      });
-    }
-
-    user.verified = true;
-    user.verificationCode = undefined;
-    await user.save();
-
-    // Generate token after verification
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: '1d'
-    });
-
-    res.status(200).json({
-      status: 'success',
-      message: 'Email verified successfully',
-      token
-    });
-  } catch (err) {
-    res.status(400).json({
-      status: 'fail',
-      message: err.message
-    });
-  }
-}
-
+// // Verify email with code
 
 
 // Reset password with code
-export async function resetPassword(req, res) {
+export async function verifyCode(req, res) {
   try {
-    const { email, code, newPassword } = req.body;
-    
+    const { email, code } = req.body;
+      // in databsea not in vscode use "  "
     const user = await User.findOne({
-      email,
-      'resetPasswordCode.code': code,
+      email, 
+      "resetPasswordCode.code": code,
       'resetPasswordCode.expiresAt': { $gt: Date.now() }
-    });
-
+    });   
     if (!user) {
       return res.status(400).json({
         status: 'fail',
@@ -493,7 +452,6 @@ export async function resetPassword(req, res) {
       });
     }
 
-    user.password = newPassword;
     user.resetPasswordCode = undefined;
     await user.save();
 
@@ -510,6 +468,39 @@ export async function resetPassword(req, res) {
 }
 
 
+// Reset password with code
+export async function resetPassword(req, res) {
+  try {
+    const { email, newPassword } = req.body;
+    
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(400).json({
+        status: 'fail',
+        message: 'Invalid or expired reset code'
+      });
+    }
+
+    user.password = newPassword;
+    await user.save();
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Password reset successful'
+    });
+  } catch (err) {
+    res.status(400).json({
+      status: 'fail',
+      message: err.message
+    });
+  }
+}
+
+
+  // CHAT GPT
+ // ASK WHY  await user.save(); NOT FINDANDUPDATE({})
+//       ALSO WHY SAVE(VALDATEBEFORESAVE:TERUE, FALSE)
 
 
 

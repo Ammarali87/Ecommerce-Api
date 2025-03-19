@@ -5,12 +5,12 @@ import {
   signup, 
   login,
   logout,
-  verifyEmail,
   forgotPassword,
   resetPassword,
-  getAllUsers,    // Add these new imports
+  getAllUsers,
   getUser,
   updateUser,
+  verifyCode,
   deleteUser
 } from '../controller/authController.js';
 
@@ -51,10 +51,10 @@ router.post('/signup', signupValidation, signup);
 router.post('/login', login);
 router.get('/logout', logout);
 
-// Email verification and password reset
-router.post('/verify-email', verifyEmail);
+// router.post('/verify-email', verifyEmail);
 router.post('/forgot-password', forgotPassword);
 router.post('/reset-password', resetPasswordValidation, resetPassword);
+router.post('/verify-code', verifyCode);
 
 // User management routes
 router.get('/users', getAllUsers);
