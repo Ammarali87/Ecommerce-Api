@@ -8,7 +8,7 @@ import jwt from 'jsonwebtoken';
 const signToken = (id) => {
     return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '1h' });
 };
-  
+
 // // **Signup**
 export async function signup(req, res) {
     try {
@@ -25,7 +25,9 @@ export async function signup(req, res) {
         });
     } catch (err) {
         if (err.name === 'ValidationError') {
-            const messages = Object.values(err.errors).map((er) => er.message);
+            const messages = 
+            Object.values(err.errors)
+            .map((er) => er.message);
             return res.status(400).json({ 
                 status: 'fail', 
                 message: messages 
@@ -92,299 +94,193 @@ export function logout(req, res) {
         message: 'Logged out successfully' 
     });
 }
-  // just see no  write 
-// Signup with email verification
-// export async function signup(req, res) {
-//   try {
-//     const { name, email, password } = req.body;
-
-//     // Check if user exists
-//     const existingUser = await User.findOne({ email });
-//     if (existingUser) {
-//       return res.status(400).json({
-//         status: 'fail',
-//         message: 'Email already registered'
-//       });
-//     }
-
-//     // Create user
-//     const user = await User.create({
-//       name,
-//       email,
-//       password,
-//       verified: false
-//     });
-
-//     // Generate verification code
-//     const verificationCode = user.generateCode();
-//     user.verificationCode = {
-//       code: verificationCode,
-//       expiresAt: Date.now() + 10 * 60 * 1000
-//     };
-
-//     try {
-//       // Send verification email
-//       await sendEmail({
-//         email: user.email,
-//         subject: 'Email Verification',
-//         html: `
-//           <div style="text-align: center;">
-//             <h2>Verify Your Email</h2>
-//             <p>Your verification code is:</p>
-//             <h1 style="color: #4CAF50; letter-spacing: 2px;">${verificationCode}</h1>
-//             <p>This code will expire in 10 minutes</p>
-//           </div>
-//         `
-//       });
-
-//       // Save user only after email is sent successfully
-//       await user.save();
-
-//       res.status(201).json({
-//         status: 'success',
-//         message: 'Verification code sent to email'
-//       });
-//     } catch (emailError) {
-//       // If email fails, delete the user and report error
-//       await User.findByIdAndDelete(user._id);
-//       console.error('Email error:', emailError);
-      
-//       return res.status(500).json({
-//         status: 'fail',
-//         message: 'Error sending verification email. Please try again.'
-//       });
-//     }
-//   } catch (err) {
-//     console.error('Signup error:', err);
-//     res.status(400).json({
-//       status: 'fail',
-//       message: err.message || 'Error during signup'
-//     });
-//   }
-// }
 
 
-// Login with verification check
-// export async function login(req, res) {
-//     try {
-//         const { email, password } = req.body;
+      // ** forget password Code **  //
 
-//         if (!email || !password) {
-//             return res.status(400).json({
-//                 status: 'fail',
-//                 message: 'Please provide email and password'
-//             });
-//         }
+  //  generate code and send code to email 
+  import sendEmail from '../config/nodemailer.js';
 
-//         const user = await User.findOne({ email }).select('+password');
+  export async function forgotPassword(req, res) {
+    try {
+      const { email } = req.body;
 
-//         if (!user || !(await user.comparePassword(password))) {
-//             return res.status(401).json({
-//                 status: 'fail',
-//                 message: 'Incorrect email or password'
-//             });
-//         }
-
-//         // Check if user is verified
-//         if (!user.verified) {
-//             return res.status(401).json({
-//                 status: 'fail',
-//                 message: 'Please verify your email first'
-//             });
-//         }
-
-//         const token = jwt.sign(
-//             { id: user._id },
-//             process.env.JWT_SECRET,
-//             { expiresIn: '1h' }
-//         );
-
-//         res.status(200).json({
-//             status: 'success',
-//             token,
-//             user: sanitizeUser(user)
-//         });
-//     } catch (err) {
-//         res.status(500).json({
-//             status: 'error',
-//             message: 'Server error'
-//         });
-//     }
-// }
-
-
-
-
-// Get all users
-export async function getAllUsers(req, res) {
-  try {
-    const users = await User.find().select('-password');
-    
-    res.status(200).json({
-      status: 'success',
-      results: users.length,
-      data: users.map(user => sanitizeUser(user))
-    });
-  } catch (err) {
-    res.status(500).json({
-      status: 'error',
-      message: 'Error fetching users'
-    });
-  }
-}
-
-// Get single user
-export async function getUser(req, res) {
-  try {
-    const user = await User.findById(req.params.id).select('-password');
-    
-    if (!user) {
-      return res.status(404).json({
-        status: 'fail',
-        message: 'User not found'
-      });
-    }
-
-    res.status(200).json({
-      status: 'success',
-      data: sanitizeUser(user)
-    });
-  } catch (err) {
-    res.status(500).json({
-      status: 'error',
-      message: 'Error fetching user'
-    });
-  }
-}
-
-// Update user
-export async function updateUser(req, res) {
-  try {
-    const allowedFields = ['name', 'email', 'password'];
-    const updates = Object.keys(req.body)
-      .filter(key => allowedFields.includes(key))
-      .reduce((obj, key) => {
-        obj[key] = req.body[key];
-        return obj;
-      }, {});
-
-    const user = await User.findById(req.params.id);
-    
-    if (!user) {
-      return res.status(404).json({
-        status: 'fail',
-        message: 'User not found'
-      });
-    }
-
-    Object.assign(user, updates);
-    await user.save();
-
-    res.status(200).json({
-      status: 'success',
-      data: sanitizeUser(user)
-    });
-  } catch (err) {
-    res.status(400).json({
-      status: 'fail',
-      message: err.message
-    });
-  }
-}
-
-// Delete user
-export async function deleteUser(req, res) {
-  try {
-    const user = await User.findByIdAndDelete(req.params.id);
-    
-    if (!user) {
-      return res.status(404).json({
-        status: 'fail',
-        message: 'User not found'
-      });
-    }
-
-    res.status(200).json({
-      status: 'success',
-      message: 'User deleted successfully'
-    });
-  } catch (err) {
-    res.status(500).json({
-      status: 'error',
-      message: 'Error deleting user'
-    });
-  }
-}
-
-
-// // Add rate limiting for login attempts
-// export async function login(req, res) {
-//   try {
-//     const { email, password } = req.body;
-
-//     if (!email || !password) {
-//       return res.status(400).json({
-//         status: 'fail',
-//         message: 'Please provide email and password'
-//       });
-//     }
-
-//     const user = await User.findOne({ email }).select('+password');
-
-//     // Check login attempts
-//     if (user && user.loginAttempts.count >= 5 && 
-//         user.loginAttempts.lastAttempt > Date.now() - 15 * 60 * 1000) {
-//       return res.status(429).json({
-//         status: 'fail',
-//         message: 'Too many login attempts. Please try again in 15 minutes'
-//       });
-//     }
-
-//     if (!user || !(await user.comparePassword(password))) {
-//       if (user) {
-//         user.loginAttempts.count += 1;
-//         user.loginAttempts.lastAttempt = Date.now();
-//         await user.save();
-//       }
-//       return res.status(401).json({
-//         status: 'fail',
-//         message: 'Incorrect email or password'
-//       });
-//     }
-
-//     // Reset login attempts on successful login
-//     user.loginAttempts.count = 0;
-//     user.lastLogin = Date.now();
-//     await user.save();
-
-//     const token = jwt.sign(
-//       { id: user._id },
-//       process.env.JWT_SECRET,
-//       { expiresIn: '1d' }
-//     );
-
-//     res.status(200).json({
-//       status: 'success',
-//       token,
-//       user: sanitizeUser(user)
-//     });
-//   } catch (err) {
-//     res.status(500).json({
-//       status: 'error',
-//       message: 'Server error'
-//     });
-//   }
-// }
+      if (!email) {
+        return res.status(400).json({
+          status: 'fail',
+          message: 'Please provide an email address'
+        });
+      }
   
+      const user = await User.findOne({ email });
+      if (!user) {
+        return res.status(404).json({
+          status: 'fail',
+          message: 'No user found with that email'
+        });
+      }
+  
+      // Generate reset code
+      const resetCode = user.generateCode(); 
+      user.passwordResetCode = resetCode;
+      user.passwordResetExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
+      
+      await user.save();
+    
+      // const message = `
+      //   <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+      //     <h2>Hi ${user.name},</h2>
+      //     <p>Your password reset code is:</p>
+      //     <h1>${resetCode}</h1>
+      //     <p>This code will expire in 10 minutes</p>
+      //   </div>`;
+  
+      // await sendEmail({
+      //   email: user.email,
+      //   subject: 'Password Reset Code',
+      //   html: message
+      // });
 
+    await sendEmail(email, 'resetPassword', resetCode);
 
-  // forget password Code
-  1// generate code and send code to email 
-export async function forgotPassword(req, res) {
+  
+      res.status(200).json({
+        status: 'success',
+        message: 'Reset code sent to email'
+      });
+  
+    } catch (err) {
+      res.status(500).json({
+        status: 'error',
+        message: 'Error sending reset code'
+      });
+    }
+  }
+  
+  // user.passwordResetVerified = true;
+  export async function verifyCode(req, res) {
+    try {
+      const { code } = req.body;
+      
+      // Add validation
+      if (!code) {
+        return res.status(400).json({
+          status: 'fail',
+          message: 'Please provide valid 6-digit reset code'
+        });
+      }
+  
+      // Find user with reset code
+      const user = await User.findOne({
+        passwordResetCode: code,
+        passwordResetExpires: { $gt: Date.now() }
+      }).select('+passwordResetCode +passwordResetExpires');
+
+      if (!user) {
+        return res.status(400).json({
+          status: 'fail',
+          message: 'Invalid or expired reset code'
+        });
+      }
+  
+      user.passwordResetVerified = true;
+      await user.save();
+
+      res.status(200).json({
+        status: 'success',
+        message: 'Code verified successfully'
+      });
+    } catch (err) {
+      res.status(500).json({
+        status: 'error',
+        message: 'Error verifying code'
+      });
+    }
+  }
+
+  export async function resetPassword(req, res) {
+    try {
+      const { email, newPassword } = req.body;
+
+      // Validate inputs
+      if (!email || !newPassword) {
+        return res.status(400).json({
+          status: 'fail',
+          message: 'Please provide email and new password'
+        });
+      }
+  
+      // Find specific user with verified reset code
+      // يطابق كل الصفات   
+      const user = await User.findOne({
+        email,
+        passwordResetVerified: true,
+        passwordResetExpires: { $gt: Date.now() }//forgot
+        // not = falst but {$gt:dDte.now()}
+               // Time now > passwordREsetExpre 
+      });      
+        
+      if (!user) {
+        return res.status(400).json({
+          status: 'fail',
+          message: 'Reset code not verified or expired'
+        });
+      }
+  
+      // Update password and clear reset fields
+      user.password = newPassword;  
+      // numer/bolean /time 
+      user.passwordResetCode = undefined; // forgot
+      user.passwordResetExpires = undefined;// forgot
+      user.passwordResetVerified = undefined; // forgot
+      await user.save();
+
+      // Generate new token
+      const token = signToken(user._id);// forgot
+
+      res.status(200).json({
+        status: 'success',
+        message: 'Password reset successful',
+        token
+      });
+  
+    } catch (err) {
+      res.status(400).json({
+        status: 'fail',
+        message: err.message
+      });
+    }
+  }
+
+  // export const reset =  async  (req,res,next) => {
+  //   const {email,newPassword} = req.body;
+  //      if(!emial or  ){
+  //        next(new ApiiError(333,"error32l3k"))
+  //      }
+  //      const user = User.findOne({
+  //       emial,{verfued:treu,verExpired:false}
+  //      })select("+password")  
+      
+  //     cont user.password= newPassword
+  //      await user.save 
+  //    }
+ 
+  // reset Pass With CurrentPass
+export async function changePassword(req, res) {
   try {
-    const { email } = req.body;
-    const user = await User.findOne({ email });
+    const { email, currentPassword, newPassword } = req.body;
+   
+    // Input validation   user or with if and not !
+    if (!email || !currentPassword || !newPassword) {
+      return res.status(400).json({
+        status: 'fail',
+        message: 'Please provide email, current password and new password'
+      });
+    }
 
+    // Find user and include password field
+    const user = await User.findOne({ email })
+    .select('+password'); // i forgot 
     if (!user) {
       return res.status(404).json({
         status: 'fail',
@@ -392,36 +288,79 @@ export async function forgotPassword(req, res) {
       });
     }
 
-    const resetCode = user.generateCode();
-    user.resetPasswordCode = {
-      code: resetCode,
-      expiresAt: Date.now() + 10 * 60 * 1000
-    };        
+    // Verify current password
 
-    await user.save();
+      // Verify current password  
+      // use comparePassword not if
+  // he store if value in const and
+  //  use it to make error  with !validPassword
+  
+    const isPasswordValid = await user.comparePassword(currentPassword);
+    if (!isPasswordValid) {
+      return res.status(401).json({
+        status: 'fail',
+        message: 'Current password is incorrect'
+      });
+    }
 
-    await sendEmail({
-      email: user.email,
-      subject: 'Password Reset Code',
-      html: `
-        <div style="max-width: 600px; margin: 0 auto; padding: 20px; font-family: Arial, sans-serif;">
-          <h2 style="color: #333; text-align: center; margin-bottom: 20px;">Reset Your Password</h2>
-          <div style="background-color: #f8f8f8; border-radius: 5px; padding: 20px; text-align: center;">
-            <p style="font-size: 16px; color: #666;">Your password reset code is:</p>
-            <h1 style="color: #4CAF50; letter-spacing: 2px; font-size: 32px; margin: 20px 0;">${resetCode}</h1>
-            <p style="color: #999; font-size: 14px;">This code will expire in 10 minutes</p>
-          </div>
-          <p style="color: #666; margin-top: 20px; text-align: center;">
-            If you didn't request a password reset, please ignore this email.
-          </p>
-        </div>
-      `
-    });
+    // Update password
+    user.password = newPassword;
+    await user.save();  // i forgot 
+
+    // Generate new token
+    const token = signToken(user._id);  // i forgot 
 
     res.status(200).json({
       status: 'success',
-      message: 'Reset code sent to email'
+      message: 'Password updated successfully',
+      token
     });
+
+  } catch (err) {
+    res.status(500).json({
+      status: 'fail',
+      message: err.message
+    });
+  }
+}
+
+import { sendSMS } from '../config/textbeltConfig.js'; // or fast2smsConfig.js or firebaseConfig.js
+
+export async function forgotPasswordSms(req, res) {
+  try {
+    const { phone } = req.body;
+
+    if (!phone) {
+      return res.status(400).json({
+        status: 'fail',
+        message: 'Please provide a phone number'
+      });
+    }
+
+    const user = await User.findOne({ phone });
+    if (!user) {
+      return res.status(404).json({
+        status: 'fail',
+        message: 'No user found with that phone number'
+      });
+    }  
+
+    // Generate reset code
+    const resetCode = user.generateCode();
+    user.passwordResetCode = resetCode;
+    user.passwordResetExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
+    
+    await user.save();
+
+    // Send SMS
+    const message = `Your reset code is: ${resetCode}. Valid for 10 minutes.`;
+    await sendSMS(user.phone, message);
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Reset code sent to your phone'
+    });
+
   } catch (err) {
     res.status(500).json({
       status: 'error',
@@ -429,85 +368,3 @@ export async function forgotPassword(req, res) {
     });
   }
 }
-
-
-
-// // Verify email with code
-
-
-// Reset password with code
-export async function verifyCode(req, res) {
-  try {
-    const { email, code } = req.body;
-      // in databsea not in vscode use "  "
-    const user = await User.findOne({
-      email, 
-      "resetPasswordCode.code": code,
-      'resetPasswordCode.expiresAt': { $gt: Date.now() }
-    });   
-    if (!user) {
-      return res.status(400).json({
-        status: 'fail',
-        message: 'Invalid or expired reset code'
-      });
-    }
-
-    user.resetPasswordCode = undefined;
-    await user.save();
-
-    res.status(200).json({
-      status: 'success',
-      message: 'Password reset successful'
-    });
-  } catch (err) {
-    res.status(400).json({
-      status: 'fail',
-      message: err.message
-    });
-  }
-}
-
-
-// Reset password with code
-export async function resetPassword(req, res) {
-  try {
-    const { email, newPassword } = req.body;
-    
-    const user = await User.findOne({ email });
-
-    if (!user) {
-      return res.status(400).json({
-        status: 'fail',
-        message: 'Invalid or expired reset code'
-      });
-    }
-
-    user.password = newPassword;
-    await user.save();
-
-    res.status(200).json({
-      status: 'success',
-      message: 'Password reset successful'
-    });
-  } catch (err) {
-    res.status(400).json({
-      status: 'fail',
-      message: err.message
-    });
-  }
-}
-
-
-  // CHAT GPT
- // ASK WHY  await user.save(); NOT FINDANDUPDATE({})
-//       ALSO WHY SAVE(VALDATEBEFORESAVE:TERUE, FALSE)
-
-
-
-//  in front
-// Example frontend reset password form
-
-
-
-// Enable "Less secure app access" in Gmail or use app-specific password
-// Implement rate limiting for password reset requests

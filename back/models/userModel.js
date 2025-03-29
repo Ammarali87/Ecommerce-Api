@@ -23,10 +23,20 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ['user', 'admin'],
+    enum: ['user', 'admin',"manager"],
     default: 'user'
   },
-  phone: String,
+  // phone: String,
+  phone: {
+    type: String,
+    required: [true, 'Please provide a phone number'],
+    validate: {
+      validator: function(v) {
+        return /^\+[1-9]\d{1,14}$/.test(v);
+      },
+      message: 'Please enter a valid phone number starting with + and country code'
+    }
+  },
   address: {
     street: String,
     city: String,
@@ -38,14 +48,21 @@ const userSchema = new mongoose.Schema({
     type: Boolean, 
     default: false 
   },
-  verificationCode: {
-    code: String,
-    expiresAt: Date
-  },
-  resetPasswordCode: {
-    code: String,
-    expiresAt: Date
-  },
+//   passwordResetCode: String,
+//  passwordResetExpires: Date,
+passwordResetCode: {
+  type: String,
+  select: false  // Hide in queries for security
+},
+passwordResetExpires: {
+  type: Date,
+  select: false  
+},
+passwordResetVerified: {
+  type: Boolean,
+  default: false,
+  select: false
+} ,
   lastLogin: Date,
   loginAttempts: {
     count: { type: Number, default: 0 },

@@ -7,12 +7,16 @@ import {
   logout,
   forgotPassword,
   resetPassword,
+  changePassword,
+  verifyCode
+} from '../controller/authController.js';
+
+import {
   getAllUsers,
   getUser,
   updateUser,
-  verifyCode,
   deleteUser
-} from '../controller/authController.js';
+} from '../controller/authCrud.js';
 
 const router = Router();
 
@@ -46,15 +50,29 @@ const resetPasswordValidation = [
   validationMiddleware
 ];
 
+// Add this with other validation rules
+const verifyCodeValidation = [
+  check('code')
+    .notEmpty()
+    .withMessage('Code is required')
+    .isLength({ min: 6, max: 6 })
+    .withMessage('Code must be 6 digits'),
+  validationMiddleware
+];
+
+
+
+// router.post('/verify-email', verifyEmail);
 // Auth routes with validation
 router.post('/signup', signupValidation, signup);
 router.post('/login', login);
 router.get('/logout', logout);
-
-// router.post('/verify-email', verifyEmail);
 router.post('/forgot-password', forgotPassword);
+router.post('/verify-code', verifyCodeValidation, verifyCode);
 router.post('/reset-password', resetPasswordValidation, resetPassword);
-router.post('/verify-code', verifyCode);
+router.post('/change-password',
+   resetPasswordValidation, changePassword);
+
 
 // User management routes
 router.get('/users', getAllUsers);

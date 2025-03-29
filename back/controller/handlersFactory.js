@@ -17,24 +17,29 @@ const uploadImage = async (file, folder) => {
   });
 };
 
-// ✅ حذف مستند
+// ✅ حذف مستند  how it delete no delete method
 export function deleteOne(Model) {
   return catchAsync(async (req, res, next) => {
-    const document = await Model.findById(req.params.id);
-
+    const document = await Model.findByIdAndDelete(req.params.id);
+    
     if (!document) {
       return next(new ApiError(`No document found with id ${req.params.id}`, 404));
     }
-
-    res.status(204).end(); // لا توجد بيانات لإرسالها
+    
+    res.status(200).json({
+      status: 'success deleted ',
+      data: null
+    });
   });
 }
+ // the code 204 give no conntent in post man 
+  // the code 202 give table 
 
+  
 // ✅ تحديث مستند
 export function updateOne(Model) {
   return catchAsync(async (req, res, next) => {
     const document = await Model.findById(req.params.id);
-
     if (!document) {
       return next(new ApiError(`No document found with id ${req.params.id}`, 404));
     }
@@ -43,7 +48,8 @@ export function updateOne(Model) {
       const imageUrl = await uploadImage(req.file, 'uploads');
       req.body.image = imageUrl;
     }
-
+      // make copy 
+      // Object.assign( );
     Object.assign(document, req.body);
     await document.save({ validateBeforeSave: false });
 
@@ -58,13 +64,16 @@ export function updateOne(Model) {
 export function createOne(Model) {
   return catchAsync(async (req, res) => {
     if (req.file) {
-      const imageUrl = await uploadImage(req.file, 'uploads');
+ const imageUrl = await uploadImage(req.file, 'uploads');
       req.body.image = imageUrl;
-    }
+    } 
 
-    const newDoc = await Model.create(req.body);
-    res.status(201).json({ data: newDoc });
-  });
+    const document = await Model.create(req.body);
+    if (!document) {
+      return next(new ApiError(`No document create with id ${req.params.id}`, 404));
+    }
+    res.status(201).json({ data: document });
+  });  
 }
 
 
@@ -86,7 +95,7 @@ export function getOne(Model, populationOpt) {
 
 export function getAll(Model, modelName = '') {
   return catchAsync(async (req, res, next) => {
-    try {
+    try {  // سلسلة
       const filter = req.filterObj || {};
       
       // Validate inputs
@@ -96,17 +105,18 @@ export function getAll(Model, modelName = '') {
       }
 
       // Get total count with error handling
+       // سلسلة
       const totalCount = await Model.countDocuments(filter)
         .catch(err => {
           throw new ApiError(500, 'Error counting documents: ' + err.message);
-        });
+        }); 
 
       const features = new ApiFeatures(Model.find(filter), req.query)
         .filter()
         .search(modelName)
-        .sort()
+        .sort()   
         .limitFields()
-        .paginate(totalCount);
+        .paginate(totalCount);  // سلسلة
 
       const documents = await features.query;
 
@@ -118,16 +128,16 @@ export function getAll(Model, modelName = '') {
       res.status(200).json({
         status: 'success',
         metadata: {
-          total: totalCount,
-          currentPage: features.paginationReslut.currentPage, 
-          totalPages: features.paginationReslut.numOfPages,
-          limit: features.paginationReslut.limit,
-          hasNext: !!features.paginationReslut.next,
-          hasPrev: !!features.paginationReslut.prev,
-          nextPage: features.paginationReslut.next || null, 
-          prevPage: features.paginationReslut.prev || null,
-          resultsOnPage: documents.length,
-        },
+          total: totalCount,  // سلسلة
+          currentPage: features.paginationResult.currentPage, 
+         // remove reslut :doc.length or this line 
+          totalPages: features.paginationResult.numOfPages,
+          limit: features.paginationResult.limit,
+          hasNext: !!features.paginationResult.next,
+          hasPrev: !!features.paginationResult.prev,
+          nextPage: features.paginationResult.next || null,  // null to remove undefind
+          prevPage: features.paginationResult.prev || null,
+        },    
         results: documents.length,
         data: documents,
       });

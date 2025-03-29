@@ -16,7 +16,7 @@
 
 class ApiFeatures {
   constructor(query, queryString) {
-    // queryString == paramter
+    // queryString == paramter 
     // query  ready to find() 
     this.query = query;
     this.queryString = queryString;
@@ -54,8 +54,8 @@ class ApiFeatures {
       }; 
     } else if (this.queryString.ratingMin || this.queryString.ratingMax) {
       filterObject.ratingsAverage = {};
-      if (this.queryString.ratingMin) filterObject.ratingsAverage.$gte = parseFloat(this.queryString.ratingMin);
-      if (this.queryString.ratingMax) filterObject.ratingsAverage.$lte = parseFloat(this.queryString.ratingMax);
+       filterObject.ratingsAverage.$gte = parseFloat(this.queryString.ratingMin) || 1;
+       filterObject.ratingsAverage.$lte = parseFloat(this.queryString.ratingMax) || 5;
     }
 
     // Handle price filters
@@ -79,8 +79,8 @@ class ApiFeatures {
     }
     return this;
   }
-
-  limit() {
+    //  عندك متغير اسمه ليميت اعمل فيلد ليميت
+  limitFields() {
     if (this.queryString.field) {
       const fields = this.queryString.field.replace(/,/g, ' ');
       this.query = this.query.select(fields);
@@ -96,7 +96,7 @@ class ApiFeatures {
     const skip = (page - 1) * limit;
     const endIndex = page * limit;
 
-  const pagination = {
+    const pagination = {
       currentPage: page,
       limit,
       numOfPages: Math.ceil(countDocuments / limit)
@@ -109,7 +109,7 @@ class ApiFeatures {
     if (skip > 0) {
       pagination.prev = page - 1;
     }
-
+     // put pagint in instance class use this 
     this.query = this.query.skip(skip).limit(limit);
     this.paginationResult = pagination;
 
