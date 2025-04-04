@@ -87,7 +87,24 @@ userSchema.methods.comparePassword = async function(candidatePassword) {
 // Generate random 6-digit code
 userSchema.methods.generateCode = function() {
   return Math.floor(100000 + Math.random() * 900000).toString();
-};
+};  // 100000+ 6النطاق)) 
+
+const passwordValidator = (password) => {
+  const regex =/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*]).{8,}$/;
+  return regex.test(password);     
+};  // ؟= /// make sure   . is all   * one at least 
+  // \d → رقم واحد فقط (0-9)
+
+  
+userSchema.path('password').validate(function(value) {
+  if (!passwordValidator(value)) {
+    throw new Error(`Password must be at least 
+      8 characters  long and contain 
+      at least one uppercase letter, one lowercase letter, one number 
+       and one special character`);
+  }
+  return true;
+});
 
 export const User = mongoose.model('User', userSchema);
 
@@ -127,10 +144,6 @@ export const User = mongoose.model('User', userSchema);
 //   verificationTokenExpires: Date,
 //   resetPasswordToken: String,
 //   resetPasswordExpires: Date,
-//   createdAt: {
-//     type: Date,
-//     default: Date.now
-//   }
 // });
 
 // // Hash password before saving

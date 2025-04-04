@@ -11,12 +11,6 @@ import {
   verifyCode
 } from '../controller/authController.js';
 
-import {
-  getAllUsers,
-  getUser,
-  updateUser,
-  deleteUser
-} from '../controller/authCrud.js';
 
 const router = Router();
 
@@ -74,10 +68,7 @@ router.post('/change-password',
    resetPasswordValidation, changePassword);
 
 
-// User management routes
-router.get('/users', getAllUsers);
-router.get('/users/:id', getUser);
-router.patch('/users/:id', userUpdateValidation, updateUser);
-router.delete('/users/:id', deleteUser);
 
+
+   
 export default router;

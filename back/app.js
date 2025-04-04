@@ -13,13 +13,16 @@ import csrf from "csurf"; // Add this import
 
 import errorMiddleware from './middleware/errorMiddleware.js';
 import { connect } from './config/mongo.js';
-import amarRoutes from './routes/amar.js';
 import authRoutes from './routes/authRoute.js';
 import storeRoutes from './routes/store.js';
 import brandRoute from './routes/brandRoute.js';
 import productRoutes from './routes/productRoute.js';
 import subCategoryRoute from './routes/subCategoryRoute.js';
 import ApiError from './utils/ApiError.js';
+import orderRoutes from './routes/orderRoute.js';
+import { protect } from './controller/authController.js';
+import userRoutes from './routes/userRoute.js';
+import profileRoutes from './routes/profileRoute.js';
 
 dotenv.config();
 
@@ -57,6 +60,17 @@ if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
   console.log("Morgan enabled in development");
 }
+
+
+// Login rate limiting
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // 5 attempts per windowMs
+  message: 'Too many login attempts, please try again later'
+});
+
+app.use('/api/v1/auth/login', loginLimiter);
+
 
 // Limit requests from same IP
 // DDOS ATTACK  
@@ -101,16 +115,20 @@ const apiRouter = express.Router();
 app.use("/api/v1", apiRouter);
 
 // Updated routes without /api/v1 prefix
-apiRouter.use("/auth", authRoutes);   
-apiRouter.use("/amar", amarRoutes);   
-apiRouter.use("/", storeRoutes);   
 apiRouter.use("/products", productRoutes);   
 apiRouter.use('/subcategories', subCategoryRoute);
 apiRouter.use('/categories/:categoryId/subcategories', subCategoryRoute);
 apiRouter.use("/brands", brandRoute);
+apiRouter.use("/auth", authRoutes);   
+apiRouter.use("/", storeRoutes);   
+
+apiRouter.use(protect); // All routes after this require authentication
+
+apiRouter.use('/orders', orderRoutes);
+apiRouter.use('/users', userRoutes); // Add this line
+apiRouter.use('/profile', profileRoutes);
 
 
-// Base route
 app.get('/', (req, res) => {
   res.send("Hello World");
 });
@@ -131,31 +149,7 @@ export default app;
 //  in front 
 
 import axios from "axios";
-//  // remove 
-// async function getCsrfToken() {
-//   const res = await axios.get("http://localhost:3000/csrf-token", {
-//     withCredentials: true, // ضروري لإرسال واستقبال الـ Cookies
-//   });
-//   return res.data.csrfToken;
-// }
 
-// async function submitForm(data) {
-//   const csrfToken = await getCsrfToken();
-
-//   await axios.post("http://localhost:3000/submit", 
-//     data, {
-//     headers: {
-//       "Content-Type": "application/json", // optional
-//       "CSRF-Token": csrfToken, // إرسال التوكن مع الطلب
-//     },
-//     withCredentials: true, // ضروري لو السيرفر بيستخدم الـ Cookies
-//   });
-// }
-
- 
-
-
-// بدل ما تضيف withCredentials: true في كل طلب، ممكن تضبط Axios افتراضيًا:
 
 const axiosInstance = axios.create({
   baseURL: "http://localhost:3000",

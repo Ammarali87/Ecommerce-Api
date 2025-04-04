@@ -2,11 +2,16 @@ import { sanitizeUser } from '../utils/sanitizeData.js';  // Fixed import path w
 import { User } from '../models/userModel.js';
 import { sendEmail } from '../config/nodemailer.js';
 import jwt from 'jsonwebtoken';
+import ApiError from '../utils/ApiError.js';
+import asyncHandler from '../utils/catchAsync.js';
+
 
     
 // Function to generate JWT
 const signToken = (id) => {
-    return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    return jwt.sign({ id }, process.env.JWT_SECRET,
+      { expiresIn: process.env.JWT_EXPIRES_IN || '30d' }
+    );
 };
 
 // // **Signup**
@@ -42,64 +47,83 @@ export async function signup(req, res) {
 
 // // **Login**
 export async function login(req, res) {
-    try {
-        const { email, password } = req.body;
+  try {
+      const { email, password } = req.body;
 
-        if (!email || !password) {
-            console.log("No email or password provided");
-            return res.status(400).json({ 
-                status: 'fail',
-                message: 'Please provide email and password' 
-            });
-        }
+      // 1. Check if email and password exist
+      if (!email || !password) {
+          return res.status(400).json({ 
+              status: 'fail',
+              message: 'Please provide email and password' 
+          });
+      }
 
-        const user = await User.findOne({ email }).select('+password');
+      // 2. Find user and include password field
+      const user = await User.findOne({ email }).select('+password');
 
-        if (!user || !(await user.comparePassword(password))) {
-            console.log("Incorrect email or password");
-            return res.status(401).json({ 
-                status: 'fail',
-                message: 'Incorrect email or password' 
-            });
-        }
+      // 3. Check if user exists & password is correct using the model method
+      if (!user || !(await user.comparePassword(password))) {
+          return res.status(401).json({ 
+              status: 'fail',
+              message: 'Incorrect email or password' 
+          });
+      }
 
-        const token = signToken(user._id);
+      // 4. If everything ok, send token
+      const token = signToken(user._id);
 
-        res.status(200).json({
-            status: 'success',
-            token,
-            user: sanitizeUser(user)
-        });
-    } catch (err) {
-        console.error("Server error:", err);
-        res.status(500).json({ 
-            status: 'error',
-            message: 'Server error',
-            error: err.message 
-        });
-    }
+      res.status(200)
+         .header('Authorization', `Bearer ${token}`)
+         .header('Access-Control-Expose-Headers', 'Authorization')
+         .json({
+             status: 'success',
+             token,
+             user: sanitizeUser(user)
+         });
+
+  } catch (err) {
+      res.status(500).json({ 
+          status: 'error',
+          message: 'Server error'
+      });
+  }
 }
 
 
 
 // **Logout**
+
+// Add token blacklist feature
+const blacklistedTokens = new Set();
+
 export function logout(req, res) {
-    res.cookie('jwt', '', { 
-        expires: new Date(0), 
-        httpOnly: true 
-    });
-    
-    res.status(200).json({ 
-        status: 'success', 
-        message: 'Logged out successfully' 
-    });
+  const token = 
+  req.headers.authorization?.split(' ')[1];
+  if (token) {
+    blacklistedTokens.add(token);
+  } 
+  
+  res.cookie('jwt', '', { 
+    expires: new Date(0), 
+    httpOnly: true, 
+  });  
+  
+  res.status(200).json({ 
+    status: 'success', 
+    message: 'Logged out successfully' 
+  });
 }
+
+
+
+
+
+
 
 
       // ** forget password Code **  //
 
   //  generate code and send code to email 
-  import sendEmail from '../config/nodemailer.js';
 
   export async function forgotPassword(req, res) {
     try {
@@ -252,19 +276,6 @@ export function logout(req, res) {
     }
   }
 
-  // export const reset =  async  (req,res,next) => {
-  //   const {email,newPassword} = req.body;
-  //      if(!emial or  ){
-  //        next(new ApiiError(333,"error32l3k"))
-  //      }
-  //      const user = User.findOne({
-  //       emial,{verfued:treu,verExpired:false}
-  //      })select("+password")  
-      
-  //     cont user.password= newPassword
-  //      await user.save 
-  //    }
- 
   // reset Pass With CurrentPass
 export async function changePassword(req, res) {
   try {
@@ -354,9 +365,12 @@ export async function forgotPasswordSms(req, res) {
 
     // Send SMS
     const message = `Your reset code is: ${resetCode}. Valid for 10 minutes.`;
+   
     await sendSMS(user.phone, message);
 
-    res.status(200).json({
+  console.log('SMS sent successfully');
+
+  res.status(200).json({
       status: 'success',
       message: 'Reset code sent to your phone'
     });
@@ -368,3 +382,195 @@ export async function forgotPasswordSms(req, res) {
     });
   }
 }
+
+
+
+
+
+
+export const allowedTo = (...roles) =>
+  asyncHandler(async (req, res, next) => {
+    // 1) access roles
+    // 2) access registered user (req.user.role)
+    if (!roles.includes(req.user.role)) {
+      return next(
+        new ApiError( "401",'You are not allowed to access this route')
+      );
+    }
+    next();
+  });
+
+
+
+  // 3. In your route handlers
+// app.get('/profile', protect, (req, res) => {
+//     // Access user information
+//     const userProfile = req.user;
+//     res.json(userProfile);
+// }); 
+
+
+
+
+
+
+  //   make sure the user is logged in
+
+  export const protect = asyncHandler(async (req, res, next) => {
+    try {
+      const token = req.headers.authorization?.startsWith('Bearer') 
+        ? req.headers.authorization.split(' ')[1] 
+        : req.cookies.jwt;
+  
+      if (!token) {
+        return next(new ApiError(401, 'Please log in to access this route'));
+      }
+  
+      // Verify token first before checking blacklist
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  
+      // Then check blacklist
+      if (blacklistedTokens.has(token)) {
+        return next(new ApiError(401, 'Invalid token, please log in again'));
+      }
+  
+      // 4) Check if user still exists
+      const user = await User.findById(decoded.id);
+      if (!user) {
+        return next(new ApiError(401, 'User no longer exists'));
+      }
+  
+      // 5) Check if user changed password after token was issued
+      // const passwordChangeTimestamp =
+      //  user.passwordChangedAt 
+      //   ? parseInt(user.passwordChangedAt.getTime() / 1000, 10)
+      //   : 0;
+  
+      // if (decoded.iat < passwordChangeTimestamp) {
+      //   return next(new ApiError(401, 'Password recently changed, please log in again'));
+      // }
+  
+      if (user.passwordChangedAt &&
+        decoded.iat < user.passwordChangedAt.getTime() / 1000)  { 
+            return next(new ApiError('Password recently changed, please log in again', 401));
+     }   
+
+     
+      // Grant access to protected route
+      req.user = user;
+      next();
+      
+    } catch (err) {
+      return next(new ApiError(401, 'Invalid token, please log in again'));
+    }
+  });
+
+
+  // export const protect = asyncHandler(async (req, res, next) => {
+  //   // Check both header and cookie
+  //   const token = 
+  //     req.headers.authorization?.startsWith('Bearer') 
+  //       ? req.headers.authorization.split(' ')[1] 
+  //       : req.cookies.jwt; 
+          
+  //   if (!token) {
+  //     return next(new ApiError(401, 'Please log in to access this route'));
+  //   } // he use try catch in verify 
+    
+  //   try {
+  //     // Verify token  not expired or changed 
+  //     // and get user by token, decode id
+  //     const decoded =   // forgot  process.env
+  //     jwt.verify(token, process.env.JWT_SECRET);
+  //              // forgot if to balckelist
+  //     // Check if token is blacklisted
+  //     if (blacklistedTokens.has(token)) {
+  //       return next(new ApiError(401,'Invalid token, please log in again'));
+  //     }    
+
+  //       // Get user     // forgot findByID(decode.id)
+  //     const user = await User.findById(decoded.id);
+  //     if (!user) {
+  //       return next(new ApiError(401,'User no longer exists'));
+  //     }
+  
+  //     // Check password change
+  //     //  console.log(decoded); can make var timeStamp =
+  //     //  parseInt(user.pa.getTime()/1000,10)
+  //    
+  //  if (user.passwordChangedAt &&
+  //        decoded.iat < user.passwordChangedAt.getTime() / 1000)  { 
+  //     return next(new ApiError('Password recently changed, please log in again', 401));
+  //     }   
+
+  //     req.user = user;    // forgot 
+  //     next();
+  //   } catch (err) {
+  //     return next(new ApiError('Invalid token', 401));
+  //   }
+  // });
+
+
+  // const MAX_LOGIN_ATTEMPTS = 5;
+  // const LOCK_TIME = 15 * 60 * 1000; // 15 minutes
+  
+  // export async function login(req, res) {
+  //   try {
+  //     const { email, password } = req.body;
+  
+  //     // Fetch the user
+  //     const user = await
+  //      User.findOne({ email }).select('+password');
+  
+  //     // Check if user exists
+  //     if (!user) {
+  //       return res.status(401).json({
+  //         status: 'fail',
+  //         message: 'Incorrect email or password'
+  //       });
+  //     }
+  
+  //     // Check if account is locked
+  //     if (user.loginAttempts.count >=
+  //        MAX_LOGIN_ATTEMPTS && 
+  //         user.loginAttempts.lastAttempt >
+  //          Date.now() - LOCK_TIME) {
+  //       return res.status(429).json({
+  //         status: 'fail',
+  //         message: 'Account locked. Please try again later'
+  //       });
+  //     }
+  
+  //     // Verify password
+  //     if (!(await user.comparePassword(password))) {
+  //       // Increment login attempts
+  //       user.loginAttempts.count = 
+  //       (user.loginAttempts.count || 0) + 1;
+  //       user.loginAttempts.lastAttempt = Date.now();
+  //       await user.save();
+  
+  //       return res.status(401).json({
+  //         status: 'fail',
+  //         message: 'Incorrect email or password'
+  //       });
+  //     }
+  
+  //     // Successful login
+  //     user.loginAttempts.count = 0;
+  //     user.loginAttempts.lastAttempt = null;
+  //     await user.save();
+  
+  //     // Proceed with the rest of your login logic...
+  //     res.status(200).json({
+  //       status: 'success',
+  //       message: 'Login successful'
+  //     });
+  
+  //   } catch (err) {
+  //     res.status(500).json({
+  //       status: 'error',
+  //       message: 'An error occurred'
+  //     });
+  //   }
+  // }
+  
