@@ -21,7 +21,8 @@ class ApiFeatures {
     this.query = query;
     this.queryString = queryString;
   }
-
+  
+//  can add    if (modelName === 'User') { 
   search() {
     if (this.queryString.search) {
       // here can make fuzzy search 

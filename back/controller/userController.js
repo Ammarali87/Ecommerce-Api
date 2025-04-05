@@ -1,75 +1,88 @@
-import { User } from '../models/userModel.js';
+import { v4 as uuidv4 } from 'uuid';
+import sharp from 'sharp';
+import bcrypt from 'bcryptjs';
+import asyncHandler from 'express-async-handler';
+
+import * as factory from './handlersFactory.js';
 import ApiError from '../utils/ApiError.js';
-import asyncHandler from '../utils/catchAsync.js';
-import { sanitizeUser } from '../utils/sanitizeData.js';
+import { User } from '../models/userModel.js';
 
-// @desc    Get all users
-// @route   GET /api/v1/users
-// @access  Private/Admin
-export const getAllUsers = asyncHandler(async (req, res) => {
-  const users = await User.find({ active: true }).select('-password');
-  
-  res.status(200).json({
-    status: 'success',
-    results: users.length,
-    data: users.map(user => sanitizeUser(user))
-  });
-});
 
-// @desc    Get single user
-// @route   GET /api/v1/users/:id
-// @access  Private/Admin
-export const getUser = asyncHandler(async (req, res) => {
-  const user = await User.findById(req.params.id).select('-password');
-  
-  if (!user || !user.active) {
-    throw new ApiError(404, 'User not found');
-  }
 
-  res.status(200).json({
-    status: 'success',
-    data: sanitizeUser(user)
-  });
-});
 
-// @desc    Update user
-// @route   PATCH /api/v1/users/:id
-// @access  Private/Admin
-export const updateUser = asyncHandler(async (req, res) => {
-  const { name, email, role, active } = req.body;
+// Use factory functions for standard CRUD operations
+export const getAllUsers = factory.getAll(User, 'User');
+export const getUser = factory.getOne(User);
+export const deleteUser = factory.deleteOne(User);
+export const createUser = factory.createOne(User);
 
-  const user = await User.findByIdAndUpdate(
+
+export const updateUser = asyncHandler(async (req, res, next) => {
+  const document = await User.findByIdAndUpdate(
     req.params.id,
-    { name, email, role, active },
-    { new: true, runValidators: true }
-  ).select('-password');
-
-  if (!user) {
-    throw new ApiError(404, 'User not found');
-  }
-
-  res.status(200).json({
-    status: 'success',
-    data: sanitizeUser(user)
-  });
-});
-
-// @desc    Delete user
-// @route   DELETE /api/v1/users/:id
-// @access  Private/Admin
-export const deleteUser = asyncHandler(async (req, res) => {
-  const user = await User.findByIdAndUpdate(
-    req.params.id,
-    { active: false },
-    { new: true }
+    {
+      name: req.body.name,
+      slug: req.body.slug,
+      phone: req.body.phone,
+      email: req.body.email,
+      profileImg: req.body.profileImg,
+      role: req.body.role,
+    },
+    {
+      new: true,
+    }
   );
 
-  if (!user) {
-    throw new ApiError(404, 'User not found');
+  if (!document) {
+    return next(new ApiError(`No document for this id ${req.params.id}`, 404));
   }
-
-  res.status(204).json({
-    status: 'success',
-    data: null
-  });
+  res.status(200).json({ data: document });
 });
+
+
+export const changeUserPassword = asyncHandler(async (req, res, next) => {
+  const document = await User.findByIdAndUpdate(
+    req.params.id,
+    {
+      password: await bcrypt.hash(req.body.password, 12),
+      passwordChangedAt: Date.now(),
+    },
+    {
+      new: true,
+    }
+  );
+
+  if (!document) {
+    return next(new ApiError(`No document for this id ${req.params.id}`, 404));
+  }
+  res.status(200).json({ data: document });
+});
+
+
+export const resizeImage = asyncHandler(async (req, res, next) => {
+  if (!req.file) return next();
+
+  const filename = `user-${uuidv4()}-${Date.now()}.jpeg`;
+
+  try {
+    await sharp(req.file.buffer)
+      .resize(600, 600)
+      .toFormat('jpeg')
+      .jpeg({ quality: 95 })
+      .toFile(`uploads/users/${filename}`);
+
+    req.body.profileImg = filename;``
+    next();
+  } catch (err) {
+    return next(new ApiError(500, 'Error processing image'));
+  }
+});
+
+
+
+
+
+
+
+
+
