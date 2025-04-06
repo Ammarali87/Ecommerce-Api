@@ -7,6 +7,10 @@ import { findByIdAndUpdate, findById } from '../models/userModel';
 // findbyIdandIpdate  designed to update by _id field
 
 
+// @desc    Add address to user addresses list
+// @route   POST /api/v1/addresses
+// @access  Protected/User
+
 export const addAddress = asyncHandler(async (req, res, next) => {
   // $addToSet => add address object to user addresses  array if address not exist
   const user = await findByIdAndUpdate(
@@ -25,15 +29,18 @@ export const addAddress = asyncHandler(async (req, res, next) => {
 });
 
 
+// @desc    Remove address from user addresses list
+// @route   DELETE /api/v1/addresses/:addressId
+// @access  Protected/User
 
-
+   // use findByidandupdata
 export const removeAddress = asyncHandler(async (req, res, next) => {
   // $pull => remove address object from user addresses array if addressId exist
   const user = await findByIdAndUpdate(
     req.user._id,
     {
       $pull: { addresses: { _id: req.params.addressId } },
-    },  
+    },    
     { new: true }
   );
 
@@ -48,6 +55,12 @@ export const removeAddress = asyncHandler(async (req, res, next) => {
 
 // findById short hand word with , id ._id 
 // findOne work with all query like name email 
+
+
+
+// @desc    Get logged user addresses list
+// @route   GET /api/v1/addresses
+// @access  Protected/User
 
 export const getLoggedUserAddresses = asyncHandler(async (req, res, next) => {
   const user = await 
