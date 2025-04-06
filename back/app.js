@@ -23,6 +23,7 @@ import orderRoutes from './routes/orderRoute.js';
 import { protect } from './controller/authController.js';
 import userRoutes from './routes/userRoute.js';
 import profileRoutes from './routes/profileRoute.js';
+import addressRoutes from './routes/addressRoute.js';
 
 dotenv.config();
 
@@ -127,6 +128,7 @@ apiRouter.use(protect); // All routes after this require authentication
 apiRouter.use('/orders', orderRoutes);
 apiRouter.use('/users', userRoutes); // Add this line
 apiRouter.use('/profile', profileRoutes);
+apiRouter.use('/addresses', addressRoutes);
 
 
 app.get('/', (req, res) => {

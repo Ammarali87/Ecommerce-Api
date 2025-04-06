@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
-import sharp from 'sharp';
+// import sharp from 'sharp';
 import bcrypt from 'bcryptjs';
 import asyncHandler from 'express-async-handler';
 
