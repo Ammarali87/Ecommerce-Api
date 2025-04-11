@@ -46,12 +46,13 @@ export const addToCart = catchAsync(async (req, res, next) => {
   } else {
     // Find product in existing cart  
     const productIndex = cart.cartItems.findIndex(
-      (item) => item.productId?.toString() === productId && item.color === color
-    );
+      (item) => item.productId?.toString() ===
+       productId && item.color === color
+    );   
 
-    if (productIndex > -1) {
+    if (productIndex > -1) {  // forgot 
       // Update existing item quantity
-      cart.cartItems[productIndex].quantity += 1;
+      cart.cartItems[productIndex].quantity ++;
     } else {
       // Add new item to cart
       cart.cartItems.push({
@@ -65,30 +66,16 @@ export const addToCart = catchAsync(async (req, res, next) => {
   }
 
   // Calculate total cart price
-  calcTotalCartPrice(cart);
-  await cart.save();
+  calcTotalCartPrice(cart);  // forgot 
+  await cart.save();   // forogt 
 
   res.status(200).json({
     status: 'success',
     message: 'Product added to cart successfully',
     numOfCartItems: cart.cartItems.length,
-    data: cart
+    data: cart  // forgo  
   });
 });
-
-
-if(!cart ){
-  await Cart.create({
-    user:req.user._id,
-    cartItems:[{prodcut:productId,color,price:prodcut.price, quantity:product.quantity}]
-  })
-} else{  const findInde = cart.cartItem.findIndex((item)=>{
-  item.product.toString()=== prodcutId && 
-  item.color === color
-})}     
- else{
-   cart.cartItem.pusth({prodcut:proId,clor,quentit , price:})
- }  
 
 
 
@@ -96,41 +83,61 @@ if(!cart ){
  
 // @desc    Get logged user cart
 // @route   GET /api/v1/cart
-// @access  Private/User
-export const getCart = catchAsync(async (req, res, next) => {
-  const cart = await Cart.findOne({ user: req.user._id });
+// @access  Private/User  
 
-  if (!cart) {
-    return next(
-      new ApiError(`There is no cart for this user id : ${req.user._id}`, 404)
-    );
-  }
 
-  res.status(200).json({
-    status: 'success',
-    numOfCartItems: cart.cartItems.length,
-    data: cart,
-  });
-});
+       // can user handelFacory 
+  export const getCart = getOne(Cart);  //no need to , "Cart"
+
+  // normal fun if whan  numOfCartItems: cart.cartItems.length
+
+//   export const getCart = catchAsync(async (req, res, next) => {
+//   const cart = await Cart.findOne({ user: req.user._id });
+
+//   if (!cart) {
+//     return next( 
+//       new ApiError( 404,`There is no cart for this user id
+//          : ${req.user._id}`)
+//     );
+//   }
+
+//   res.status(200).json({
+//     status: 'success',
+//     numOfCartItems: cart.cartItems.length,
+//     data: cart,
+//   });
+// });
 
 
 export const addToGuestCart = catchAsync(async (req, res, next) => {
+  const { productId, quantity,color } = req.body;
+  // no need to make var cart 
   if (!req.session.guestCart) {
     req.session.guestCart = {
-      cartItems: [],
+      cartItems: [{
+          productId,
+          quantity,color,
+          addedAt: new Date()}
+      ],
       totalPrice: 0
     };
+
+    const existingItem = req.session.guestCart.cartItems.find(
+      item => item.productId === productId && item.color === color
+    ); 
+    if (existingItem) {  // not like mongo cart.cartitem[index].qutn++
+      existingItem.quantity += quantity;
+    } else {
+      req.session.guestCart.cartItems.push({
+        productId,
+        quantity,
+        color,
+        addedAt: new Date()
+      });
+    }
   }
+  await req.session.save(); // alwawy must make save to your work like close exell
 
-  const { productId, quantity } = req.body;
-  req.session.guestCart.cartItems.push({
-    productId,
-    quantity,
-    addedAt: new Date()
-  });
-
-  await req.session.save();
-  
   res.status(200).json({
     status: 'success',
     data: req.session.guestCart
@@ -140,12 +147,14 @@ export const addToGuestCart = catchAsync(async (req, res, next) => {
 // @desc    Remove specific cart item
 // @route   DELETE /api/v1/cart/:itemId
 // @access  Private/User
+// 
 export const  removeFromCart = catchAsync(async (req, res, next) => {
   const cart = await Cart.findOneAndUpdate(
-    { user: req.user._id },
-    {
+    { user: req.user._id },  
+    // _id:req.prams not body caust id will in prams url /:itemId
+    {     
       $pull: { cartItems: { _id: req.params.itemId } },
-    },
+    },    
     { new: true }
   );
 
@@ -166,7 +175,7 @@ export const  removeFromCart = catchAsync(async (req, res, next) => {
 export const clearCart = catchAsync(async (req, res, next) => {
   await Cart.findOneAndDelete({ user: req.user._id });
   res.status(204).send();
-});
+});         // or update {cartITem:[]}
 
 // @desc    Update specific cart item quantity
 // @route   PUT /api/v1/cart/:itemId

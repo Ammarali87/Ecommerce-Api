@@ -4,6 +4,7 @@ import Product from '../models/productModel.js';
 
 export const getAllProducts = getAll(Product, 'Product');
 export const getProduct = getOne(Product, { path: 'reviews' });
+//  {path :"reviews"}  for popluatOpoti 
 export const createProduct = createOne(Product);
 export const updateProduct = updateOne(Product);
 export const deleteProduct = deleteOne(Product);

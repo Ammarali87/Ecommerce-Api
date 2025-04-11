@@ -1,7 +1,7 @@
 import { Schema, model } from 'mongoose';
 
 const cartSchema = new Schema(
-  {
+  {          // can be {} or one vlaue : String 
     cartItems: [
       {
         name:String,

@@ -2,6 +2,7 @@ import catchAsync from 'express-async-handler';
 import ApiError from '../utils/ApiError.js';
 import ApiFeatures from '../utils/ApiFeatures.js';
 import cloudinary from '../config/cloudinaryConfig.js';
+import { model } from 'mongoose';
 
 // Function to handle image uploads
 const uploadImage = async (file, folder) => {
@@ -77,25 +78,40 @@ export function createOne(Model) {
 }
 
 
+
 export function getOne(Model, populationOpt) {
   return catchAsync(async (req, res, next) => {
-    let query = Model.findById(req.params.id);
-    if (populationOpt) query = query.populate(populationOpt);
-
-    const document = await query;
-
-    if (!document) {
-      return next(new ApiError(404, `No document found with id ${req.params.id}`));
+    let query;
+             // forgot .modeNAme  also let out side if
+    // تحقق إذا كان الموديل هو Cart (من خلال الاسم)
+    if (Model.modelName === 'Cart') {
+      query = Model.findOne({ user: req.user._id });
+    } else {
+      query = Model.findById(req.params.id);
     }
 
-    res.status(200).json({ data: document });
+    // إضافة populate لو موجود
+    if (populationOpt) query = query.populate(populationOpt);
+
+    const doc = await query;
+
+    if (!doc) {
+      return next(
+        new ApiError(404, `No document found for this id`)
+      );
+    }
+
+    res.status(200).json({
+      status: 'success',
+      data: doc,
+    });
   });
 }
 
 
 export function getAll(Model, modelName = '') {
   return catchAsync(async (req, res, next) => {
-    try {  // سلسلة
+    try {  // سلسلة   if not work change to filter 
       const filter = req.filterObj || {};
       
       // Validate inputs
