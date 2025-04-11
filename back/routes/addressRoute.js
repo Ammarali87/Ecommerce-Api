@@ -1,20 +1,18 @@
 import { Router } from 'express';
-import { protect } from '../controller/authController.js';
 import {
   addAddress,
   removeAddress,
   getLoggedUserAddresses
 } from '../controller/addressService.js';
 
+import { addAddressValidator, removeAddressValidator } from '../utils/validator/addressValidator.js';
+
 const router = Router();
 
-// Protect all address routes
-router.use(protect);
-
 router.route('/')
-  .post(addAddress)
+  .post(addAddressValidator,addAddress)
   .get(getLoggedUserAddresses);
 
-router.delete('/:addressId', removeAddress);
+router.delete('/:addressId', removeAddressValidator,removeAddress);
 
 export default router;

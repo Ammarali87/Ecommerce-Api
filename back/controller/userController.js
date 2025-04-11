@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
-// import sharp from 'sharp';
+import sharp from 'sharp';
 import bcrypt from 'bcryptjs';
 import asyncHandler from 'express-async-handler';
 
@@ -8,7 +8,7 @@ import ApiError from '../utils/ApiError.js';
 import { User } from '../models/userModel.js';
 
 
-
+//  user for admin profile for client user
 
 // Use factory functions for standard CRUD operations
 export const getAllUsers = factory.getAll(User, 'User');

@@ -1,6 +1,34 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 
+// addressSchema
+const addressSchema = new mongoose.Schema({
+  street: {
+    type: String,
+    required: [true, 'Street address is required']
+  },
+  city: {
+    type: String,
+    required: [true, 'City is required']
+  },
+  state: {
+    type: String,
+    required: [true, 'State is required']
+  },
+  zipCode: {
+    type: String,
+    required: [true, 'Zip code is required']
+  },
+  country: {
+    type: String,
+    required: [true, 'Country is required']
+  }
+}, { _id: true });
+
+
+
+
+ // user schema  to store user data
 const userSchema = new mongoose.Schema({
   name: { 
     type: String, 
@@ -37,13 +65,7 @@ const userSchema = new mongoose.Schema({
       message: 'Please enter a valid phone number starting with + and country code'
     }
   },
-  address: {
-    street: String,
-    city: String,
-    state: String,
-    zipCode: String,
-    country: String
-  },
+  addresses: [addressSchema],
   verified: { 
     type: Boolean, 
     default: false 
@@ -112,9 +134,8 @@ export const User = mongoose.model('User', userSchema);
 
 
 
-// import mongoose from 'mongoose';
-// import bcrypt from 'bcryptjs';
-// import crypto from 'crypto';
+
+
 
 // const userSchema = new mongoose.Schema({
 //   name: { 
@@ -228,4 +249,3 @@ export const User = mongoose.model('User', userSchema);
 // //   return await bcrypt.compare(enteredPassword, this.password);
 // // };
 
-// // export const User = mongoose.model('User', userSchema);

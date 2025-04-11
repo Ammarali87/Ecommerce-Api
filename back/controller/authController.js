@@ -16,33 +16,48 @@ const signToken = (id) => {
 
 // // **Signup**
 export async function signup(req, res) {
-    try {
-        const { name, email, password } = req.body;
-        const newUser = await User.create({ name, email, password });
-
-        const token = signToken(newUser._id);
-        console.log("Sign up success");
-        
-        res.status(201).json({
-            status: 'success',
-            token,
-            user: sanitizeUser(newUser)
-        });
-    } catch (err) {
-        if (err.name === 'ValidationError') {
-            const messages = 
-            Object.values(err.errors)
-            .map((er) => er.message);
-            return res.status(400).json({ 
-                status: 'fail', 
-                message: messages 
-            });
+  try {
+      const { name, email, password, phone, role } = req.body;
+      
+      // Only allow admin creation if no other admins exist (first admin)
+      if (role === 'admin') {
+        const adminExists = await User.findOne({ role: 'admin' });
+        if (adminExists) {
+          return res.status(403).json({
+            status: 'fail',
+            message: 'Admin already exists. Cannot create multiple admins through signup.'
+          });
         }
-        res.status(400).json({ 
-            status: 'fail', 
-            message: err.message 
-        });
-    }
+      }
+
+      const newUser = await User.create({ 
+          name, 
+          email, 
+          password,
+          phone,
+          role: role || 'user' // Default to 'user' if no role provided
+      });
+
+      const token = signToken(newUser._id);
+      
+      res.status(201).json({
+          status: 'success',
+          token,
+          user: sanitizeUser(newUser)
+      });
+  } catch (err) {
+      if (err.name === 'ValidationError') {
+          const messages = Object.values(err.errors).map(er => er.message);
+          return res.status(400).json({ 
+              status: 'fail', 
+              message: messages 
+          });
+      }
+      res.status(400).json({ 
+          status: 'fail', 
+          message: err.message 
+      });
+  }
 }
 
 // // **Login**

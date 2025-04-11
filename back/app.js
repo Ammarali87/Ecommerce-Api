@@ -24,6 +24,12 @@ import { protect } from './controller/authController.js';
 import userRoutes from './routes/userRoute.js';
 import profileRoutes from './routes/profileRoute.js';
 import addressRoutes from './routes/addressRoute.js';
+import cartRoutes from './routes/cartRoute.js';
+import reviewRoutes from './routes/reviewRoute.js';
+import couponRoutes from './routes/couponRoute.js';
+
+
+// http://localhost:3000/api/v1/csrf-token
 
 dotenv.config();
 
@@ -31,20 +37,28 @@ const app = express();
 
 // Security Middleware
  // protect headers
-app.use(helmet());
-app.use(cors());
-// why and what happen without 
+// app.use(helmet());
+// Add before routes
+app.use(helmet({
+  contentSecurityPolicy: process.env.NODE_ENV === 'production' ? undefined : false,
+  crossOriginEmbedderPolicy: false,
+  crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
+
+// Keep only one CORS configuration
 app.use(cors({
-  origin: 'http://localhost:3000',
-  credentials: true
+  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS']
 }));
 
 app.options('*', cors());
 app.use(cookieParser());
-// app.use(cookieParser(process.env.COOKIE_SECRET || 'your-secret-key'));
+app.use(cookieParser(process.env.COOKIE_SECRET || 'your-secret-key'));
 const csrfProtection = csrf({ cookie: true });
-app.use(csrfProtection);
-
+ 
+ 
+ 
 // Route to get CSRF token
 app.get("/csrf-token", (req, res) => {
   res.json({ csrfToken: req.csrfToken() });
@@ -56,7 +70,7 @@ app.post("/submit", (req, res) => {
 });
 
 
-// Development logging
+// Development logging morgan 
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
   console.log("Morgan enabled in development");
@@ -75,11 +89,18 @@ app.use('/api/v1/auth/login', loginLimiter);
 
 // Limit requests from same IP
 // DDOS ATTACK  
+// const limiter = rateLimit({
+//   max: 100,
+//   windowMs: 60 * 60 * 1000, // 1 hour in mili second
+//   message: 'Too many requests from this IP, please try again in an hour!'
+// }); 
+
+// Make rate limiter configurable
 const limiter = rateLimit({
-  max: 100,
-  windowMs: 60 * 60 * 1000, // 1 hour in mili second
-  message: 'Too many requests from this IP, please try again in an hour!'
-}); 
+  max: process.env.API_RATE_LIMIT || 100,
+  windowMs: process.env.API_RATE_LIMIT_WINDOW || 60 * 60 * 1000,
+  message: 'Too many requests from this IP, please try again later'
+});
 app.use('/api', limiter);
 
 // Body parser
@@ -111,6 +132,14 @@ app.get('/favicon.ico', (req, res) => res.status(204));
 // Connect to database
 connect();
 
+ // test connection
+app.get('/health', (req, res) => {
+  res.status(200).json({ 
+    status: 'success',
+    message: 'Server is running'
+  });
+});
+
 // Routes
 const apiRouter = express.Router();
 app.use("/api/v1", apiRouter);
@@ -121,23 +150,28 @@ apiRouter.use('/subcategories', subCategoryRoute);
 apiRouter.use('/categories/:categoryId/subcategories', subCategoryRoute);
 apiRouter.use("/brands", brandRoute);
 apiRouter.use("/auth", authRoutes);   
+apiRouter.use('/reviews', reviewRoutes);
+apiRouter.use('/products/:productId/reviews', reviewRoutes);
+apiRouter.use("/cart", cartRoutes);   
 apiRouter.use("/", storeRoutes);   
 
 apiRouter.use(protect); // All routes after this require authentication
+// app.use(csrfProtection);
 
 apiRouter.use('/orders', orderRoutes);
-apiRouter.use('/users', userRoutes); // Add this line
-apiRouter.use('/profile', profileRoutes);
+apiRouter.use('/coupons', couponRoutes);
+apiRouter.use('/users', userRoutes); // admin controller
+apiRouter.use('/profile', profileRoutes); // user controller
 apiRouter.use('/addresses', addressRoutes);
 
-
-app.get('/', (req, res) => {
-  res.send("Hello World");
-});
+// remove this 
+// app.get('/', (req, res) => {
+//   res.send("Hello World");
+// });
 
 // Handle 404 routes
 app.all("*", (req, res, next) => {
-   next(new ApiError(400, `Route not found: ${req.originalUrl}`));
+   next(new ApiError(404, `Route not found: ${req.originalUrl}`));
 });   
 
 

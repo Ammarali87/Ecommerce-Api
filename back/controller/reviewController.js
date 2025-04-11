@@ -1,5 +1,8 @@
-import { getAll, getOne, createOne, updateOne, deleteOne } from './handlersFactory';
-import Review from '../models/reviewModel';
+import { getAll, getOne, createOne, updateOne, deleteOne } from './handlersFactory.js';
+import Review from '../models/ReviewModel.js';
+import catchAsync from '../utils/catchAsync.js';
+import ApiError from '../utils/ApiError.js';
+
 
 // Nested route
 // GET /api/v1/products/:productId/reviews
@@ -10,7 +13,7 @@ export function createFilterObj(req, res, next) {
   next();
 }
 
-export const getReviews = getAll(Review);
+export const getProductReviews = getAll(Review);
 
 export const getReview = getOne(Review);
 
