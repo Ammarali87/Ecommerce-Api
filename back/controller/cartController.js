@@ -37,16 +37,16 @@ export const addToCart = catchAsync(async (req, res, next) => {
     cart = await Cart.create({
       user: req.user._id,
       cartItems: [{
-        product: productId,  // Changed from productId to product
+        productId,  
         color,
         price: product.price,
         quantity: 1
       }]  
-    });
+    });      
   } else {
-    // Find product in existing cart
+    // Find product in existing cart  
     const productIndex = cart.cartItems.findIndex(
-      (item) => item.product?.toString() === productId && item.color === color
+      (item) => item.productId?.toString() === productId && item.color === color
     );
 
     if (productIndex > -1) {
@@ -55,7 +55,8 @@ export const addToCart = catchAsync(async (req, res, next) => {
     } else {
       // Add new item to cart
       cart.cartItems.push({
-        product: productId,  // Changed from productId to product
+        name: product.name,   
+        productId,   
         color,
         price: product.price,
         quantity: 1
@@ -75,53 +76,24 @@ export const addToCart = catchAsync(async (req, res, next) => {
   });
 });
 
-// export const addToCart = catchAsync(async (req, res, next) => {
-//   const { productId, color } = req.body;
-//   const product = await Product.findById(productId);
-//            // forgot user:req.user
-//   // 1) Get Cart for logged user
-//   let cart = await Cart.findOne({ user: req.user._id });
 
-//   if (!cart) {
-//     // create cart fot logged user with product
-//     cart = await Cart.create({
-//       user: req.user._id,
-//       cartItems: [{  productId, // can be title
-//          color, price: product.price }],
-//     }); // price form DB color and user
-//     //  from req.body  req.user._id
+if(!cart ){
+  await Cart.create({
+    user:req.user._id,
+    cartItems:[{prodcut:productId,color,price:prodcut.price, quantity:product.quantity}]
+  })
+} else{  const findInde = cart.cartItem.findIndex((item)=>{
+  item.product.toString()=== prodcutId && 
+  item.color === color
+})}     
+ else{
+   cart.cartItem.pusth({prodcut:proId,clor,quentit , price:})
+ }  
 
-//   } else {  // must  findIndex  to 
-//   //  update product quantity
-//     // product exist in cart, update product quantity
-//     const productIndex = cart.cartItems.findIndex(
-//       (item) => item.product.toString()
-//        === productId && item.color === color
-//     ); 
 
-//     if (productIndex > -1) { 
-//       const cartItem = cart.cartItems[productIndex];
-//       cartItem.quantity += 1;
 
-//       cart.cartItems[productIndex] = cartItem;
-//     } else {
-//       // product not exist in cart,  push product to cartItems array
-//       cart.cartItems.push({ productId, color, price: product.price });
-//     } 
-//   }
 
-//   // Calculate total cart price
-//   calcTotalCartPrice(cart);
-//   await cart.save();
-
-//   res.status(200).json({
-//     status: 'success',
-//     message: 'Product added to cart successfully',
-//     numOfCartItems: cart.cartItems.length,
-//     data: cart,
-//   });
-// });
-
+ 
 // @desc    Get logged user cart
 // @route   GET /api/v1/cart
 // @access  Private/User

@@ -4,7 +4,8 @@ const cartSchema = new Schema(
   {
     cartItems: [
       {
-        product: {
+        name:String,
+        productId: {  
           type: Schema.ObjectId,
           ref: 'Product',
         },
@@ -18,7 +19,7 @@ const cartSchema = new Schema(
     ],
     totalCartPrice: Number,
     totalPriceAfterDiscount: Number,
-    user: {
+    user: {  
       type: Schema.ObjectId,
       ref: 'User',
     },
