@@ -28,11 +28,12 @@ import cartRoutes from './routes/cartRoute.js';
 import reviewRoutes from './routes/reviewRoute.js';
 import couponRoutes from './routes/couponRoute.js';
 
+ 
 
 // http://localhost:3000/api/v1/csrf-token
 
 dotenv.config();
-
+ 
 const app = express();
 
 // Security Middleware
@@ -134,11 +135,9 @@ connect();
 
  // test connection
 app.get('/health', (req, res) => {
-  res.status(200).json({ 
-    status: 'success',
-    message: 'Server is running'
-  });
+  res.send("Hello World");
 });
+
 
 // Routes
 const apiRouter = express.Router();
@@ -164,10 +163,6 @@ apiRouter.use('/users', userRoutes); // admin controller
 apiRouter.use('/profile', profileRoutes); // user controller
 apiRouter.use('/addresses', addressRoutes);
 
-// remove this 
-// app.get('/', (req, res) => {
-//   res.send("Hello World");
-// });
 
 // Handle 404 routes
 app.all("*", (req, res, next) => {

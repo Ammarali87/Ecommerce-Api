@@ -8,7 +8,8 @@ const PORT = process.env.PORT || 4000;
    // server.close(()=>{ process.exit(1)})
    
 const server = app.listen(PORT, () => {
-  console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
+  console.log(`Server running in 
+    ${process.env.NODE_ENV} mode on port ${PORT}`);
 });
 
 // Handle unhandled rejections promise
