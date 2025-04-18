@@ -12,7 +12,7 @@ import cookieParser from "cookie-parser";
 import csrf from "csurf"; // Add this import
 
 import errorMiddleware from './middleware/errorMiddleware.js';
-import { connect } from './config/mongo.ts';
+import { connect } from './config/mongo.js';
 import authRoutes from './routes/authRoute.js';
 import storeRoutes from './routes/store.js';
 import brandRoute from './routes/brandRoute.js';

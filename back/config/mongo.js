@@ -3,18 +3,14 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-declare namespace NodeJS {
-  interface ProcessEnv {
-    MONGODB_URI: string;
-  }
-}
 
-const MONGODB_URI: string = process.env.MONGO_URI || 'mongodb://localhost/ecommerce';
+
+const MONGODB_URI = process.env.MONGO_URI || 'mongodb://localhost/ecommerce';
 
 mongoose.set('strictQuery', true);
 
 
-export const connect = async (): Promise<void> => {
+export const connect = async () => {
   try {
     await mongoose.connect(MONGODB_URI);
     console.log('✅ Connected to MongoDB');

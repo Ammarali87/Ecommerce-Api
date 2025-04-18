@@ -8,7 +8,7 @@ import ApiError from '../utils/ApiError.js';
 import { User } from '../models/userModel.js';
 
 
-//  user for admin profile for client user
+//  user for admin  ,  profile for client user
 
 // Use factory functions for standard CRUD operations
 export const getAllUsers = factory.getAll(User, 'User');

@@ -2,8 +2,8 @@ import { Router } from 'express';
 import { protect, allowedTo } from '../controller/authController.js';
 import {
   createOrder,
-  getOrders,
-  getMyOrders,
+  getAllOrders,
+  getMyOrder,
   cancelOrder,
   updateOrder
 } from '../controller/orderController.js';
@@ -15,12 +15,12 @@ router.use(protect);
 
 // User routes
 router.post('/', allowedTo('user'), createOrder);
-router.get('/my-orders', allowedTo('user'), getMyOrders);
+router.get('/my-orders', allowedTo('user'), getMyOrder);
 router.patch('/cancel/:id', allowedTo('user'), cancelOrder);
 
 // Admin routes
 router.use(allowedTo('admin', 'manager'));
-router.get('/', getOrders);
+router.get('/', getAllOrders);
 router.patch('/:id', updateOrder);
 
 export default router;

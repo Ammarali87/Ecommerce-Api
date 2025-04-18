@@ -5,7 +5,7 @@ const orderSchema = new mongoose.Schema({
     type: mongoose.Schema.ObjectId,
     ref: 'User',
     required: true
-  },
+  }, 
   items: [{
     product: {
       type: mongoose.Schema.ObjectId,
@@ -25,6 +25,10 @@ const orderSchema = new mongoose.Schema({
   totalAmount: {
     type: Number,
     required: true
+  },
+  totalPrice:{
+    type:Number, 
+    required:true
   },
   status: {
     type: String,
@@ -53,3 +57,4 @@ const orderSchema = new mongoose.Schema({
 });
 
 export default mongoose.model('Order', orderSchema);
+

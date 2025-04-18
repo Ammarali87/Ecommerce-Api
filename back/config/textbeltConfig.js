@@ -3,26 +3,16 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-declare namespace NodeJS {
-  interface ProcessEnv {
-    MONGODB_URI: string;
-  }
-}
 
 const TEXTBELT_API_URL = 'https://textbelt.com/text';
-const TEXTBELT_API_KEY: string | undefined = process.env.TEXTBELT_API_KEY;
+const TEXTBELT_API_KEY= process.env.TEXTBELT_API_KEY;
 
 if (!TEXTBELT_API_KEY) {
   throw new Error('Missing TEXTBELT_API_KEY in environment variables.');
 }
 
-interface SendSMSResponse {
-  success: boolean;
-  messageId: string;
-  quotaRemaining: number;
-}
 
-export const sendSMS = async (phone: string, message: string): Promise<SendSMSResponse> => {
+export const sendSMS = async (phone, message) => {
   try {
     console.log(`Attempting to send SMS to ${phone}`);
 
@@ -43,25 +33,21 @@ export const sendSMS = async (phone: string, message: string): Promise<SendSMSRe
       messageId: response.data.textId,
       quotaRemaining: response.data.quotaRemaining,
     };
-  } catch (error: any) {
+  } catch (error) {
     console.error('SMS sending failed:', error.message);
     throw new Error(`Failed to send SMS: ${error.message}`);
   }
 };
 
-interface CheckStatusResponse {
-  success: boolean;
-  status: string;
-  [key: string]: any;
-}
 
-export const checkSMSStatus = async (textId: string): Promise<CheckStatusResponse> => {
+
+export const checkSMSStatus = async()  => {
   try {
     const response = await axios.get(`https://textbelt.com/status/${textId}`, {
       params: { key: TEXTBELT_API_KEY },
     });
     return response.data;
-  } catch (error: any) {
+  } catch (error) {
     console.error('Status check failed:', error.message);
     throw new Error('Failed to check SMS status');
   }
