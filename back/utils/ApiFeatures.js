@@ -2,6 +2,8 @@
 // add this to every thing
 // no this in new var from var just one this 
 
+import { modelNames } from "mongoose";
+
 // the use of class 
 // const features = new ApiFeatures(Model.find()
 // , req.query)     starit with search 
@@ -18,12 +20,21 @@ class ApiFeatures {
   constructor(query, queryString) {
     // queryString == paramter 
     // query  ready to find() 
-    this.query = query;
+    this.query = query;    // to create variables in Class use this  
     this.queryString = queryString;
-  }
+  } 
   
-//  can add    if (modelName === 'User') { 
-  search() {
+//  can add    if (modelName === 'User') { any code} 
+// Expample 
+// search(modelName) {
+  // if (this.queryString.search) {
+    // if (modelName === 'User') {
+      // Fuzzy search for User model (e.g., by name or email)
+      // const searchObj = {
+        // $or: [
+          // { name: { $regex: this.queryString.search, $options: 'i' } },
+
+  search(modelName) { 
     if (this.queryString.search) {
       // here can make fuzzy search 
       const searchObj = {
@@ -46,7 +57,7 @@ class ApiFeatures {
     excludedFields.forEach(el => delete queryObj[el]);
       // can make without exclude const 
     const filterObject = { ...queryObj };
-
+      
     // Handle rating filters
     if (this.queryString.rating) {
       filterObject.ratingsAverage = {

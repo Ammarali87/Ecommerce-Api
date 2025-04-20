@@ -20,7 +20,7 @@ export const createUser = factory.createOne(User);
 export const updateUser = asyncHandler(async (req, res, next) => {
   const document = await User.findByIdAndUpdate(
     req.params.id,
-    {
+    {   
       name: req.body.name,
       slug: req.body.slug,
       phone: req.body.phone,
@@ -42,7 +42,7 @@ export const updateUser = asyncHandler(async (req, res, next) => {
 
 export const changeUserPassword = asyncHandler(async (req, res, next) => {
   const document = await User.findByIdAndUpdate(
-    req.params.id,
+    req.params.id,  // obj or no obj if req
     {
       password: await bcrypt.hash(req.body.password, 12),
       passwordChangedAt: Date.now(),
