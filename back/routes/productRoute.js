@@ -15,7 +15,7 @@ import {
   getProductValidator,
 } from '../utils/validator/prodcutValidate.js';
 
-import { protect, allowedTo } from "../controller/authController.js";
+import { allowedTo, protect } from "../controller/authController.js";
 
 const router = Router();
 
@@ -23,30 +23,27 @@ const router = Router();
 router.get("/", getAllProducts);  // ✅ Changed from getProducts
 router.get("/:id", getProductValidator, getProduct);
 
+router.use(protect);   // can add to all  only regesters can view
+
 
    // i forgot  upload.single("imageCover"),
-// Protected routes - need authentication
-router
-  .route("/add-product")
-  .post(     
-    protect, // Check if user is logged in
+router  // add 3 stuff 
+  .route("/add-product") 
+  .post(    //  remove protect do not add many 
     allowedTo("admin", "manager"), // Only allow admin/manager roles
     upload.single("imageCover"),
-    createProduct
+    createProductValidator
   );   
-
 
  
 router
 .route("/:id")
 .put(
-  protect,
   allowedTo("admin", "manager"),
   updateProductValidator,
   updateProduct
 )
 .delete(
-  protect, 
   allowedTo("admin"), // Only admin can delete
  deleteProductValidator, deleteProduct
 );
@@ -58,14 +55,13 @@ router
 
 // Admin or manager
 router.post("/products",
-   protect, allowedTo("admin", "manager"), createProduct);
+    allowedTo("admin", "manager"), createProduct);
 
 // Multiple roles with different HTTP methods
-router.route("/orders")
-  .get(protect, allowedTo("admin", "manager", "user")) // All can view
-  .post(protect, allowedTo("user")) // Only users can create
-  .delete(protect, allowedTo("admin")); // Only admin can delete
-
+// router.route("/orders") .get( allowedTo("admin " , "manager" , "user" ))
+//   .get( allowedTo("admin", "manager", "user")) // All can view
+//   .post( allowedTo("user")) // Only users can create
+//   .delete( allowedTo("admin")); // Only admin can delete
 
 
 

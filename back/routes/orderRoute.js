@@ -11,12 +11,14 @@ import {
 const router = Router();
 
 // Protect all order routes  can remove if whant
-router.use(protect);
+// router.use(protect);    remove i have protect in app.js 
+
 
 // User routes
 router.post('/', allowedTo('user'), createOrder);
 router.get('/my-orders', allowedTo('user'), getMyOrder);
 router.patch('/cancel/:id', allowedTo('user'), cancelOrder);
+
 
 // Admin routes
 router.use(allowedTo('admin', 'manager'));

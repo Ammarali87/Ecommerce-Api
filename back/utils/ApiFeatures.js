@@ -66,53 +66,58 @@ class ApiFeatures {
       }; 
     } else if (this.queryString.ratingMin || this.queryString.ratingMax) {
       filterObject.ratingsAverage = {};
-       filterObject.ratingsAverage.$gte = parseFloat(this.queryString.ratingMin) || 1;
-       filterObject.ratingsAverage.$lte = parseFloat(this.queryString.ratingMax) || 5;
+       filterObject.ratingsAverage.$gte =
+        parseFloat(this.queryString.ratingMin) || 1;
+       filterObject.ratingsAverage.$lte =
+        parseFloat(this.queryString.ratingMax) || 5;
     }
 
     // Handle price filters
     if (this.queryString.priceMin || this.queryString.priceMax) {
       filterObject.price = {};
-      filterObject.price.$gte = parseFloat(this.queryString.priceMin) || 0;
-      filterObject.price.$lte = parseFloat(this.queryString.priceMax) || 340; // Default max price
+      filterObject.price.$gte = 
+      parseFloat(this.queryString.priceMin) || 0;
+      filterObject.price.$lte = 
+      parseFloat(this.queryString.priceMax) || 340; // Default max price
     }
 
     this.query = this.query.find(filterObject);
     return this;
   }
 
-  sort() { 
+  sort() {      
     if (this.queryString.sort) {
-      const sortBy = 
-      this.queryString.sort.replace(/,/g, ' ');
-      this.query = this.query.sort(sortBy);
+      this.queryString.sort.replace(/,/g, ' '); 
+      this.query = this.query.sort(sortBy); 
+       // same //sort(this.queryString.sort)
     } else { 
-      this.query = this.query.sort('-createdAt');
+      this.query = this.query.sort('-createdAt'); // same
     }
     return this;
   }
     //  عندك متغير اسمه ليميت اعمل فيلد ليميت
-  limitFields() {
+  limitFields() { // limitFields use select ,questrin.filed
     if (this.queryString.field) {
       const fields = this.queryString.field.replace(/,/g, ' ');
       this.query = this.query.select(fields);
     } else {
       this.query = this.query.select('-__v');
     }
-    return this;
+    return this; 
   }
+
 
   paginate(countDocuments) {
     const page = parseInt(this.queryString.page) || 1;
     const limit = parseInt(this.queryString.limit) || 12;
-    const skip = (page - 1) * limit;
-    const endIndex = page * limit;
+    const skip = (page - 1) * limit; //for prev  // skip show what before  0 or products 
+    const endIndex = page * limit; // for future   // num of proudcts  
 
     const pagination = {
       currentPage: page,
       limit,
-      numOfPages: Math.ceil(countDocuments / limit)
-    };
+      totalPages: Math.ceil(countDocuments / limit)
+    };   
 
     if (endIndex < countDocuments) {
       pagination.next = page + 1;
@@ -120,9 +125,12 @@ class ApiFeatures {
 
     if (skip > 0) {
       pagination.prev = page - 1;
-    }
+    }     
+        // this usefull to call var  in any place in class 
+        // create Var buy this.newVar this.paginationResult = page
      // put pagint in instance class use this 
     this.query = this.query.skip(skip).limit(limit);
+      // query at the end 
     this.paginationResult = pagination;
 
     return this;
