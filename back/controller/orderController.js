@@ -24,13 +24,11 @@ import { getAll, getOne, createOne,
 
 export const createOrder = asyncHandler(async (req, res) => {
   const { items, shippingAddress, paymentMethod } = req.body;
-      
-  // ✅ تحقق إن فيه عناصر في الطلب
+
   if (!items || !items.length) {
     throw new ApiError(400, 'Order must contain at least one item');
   }
 
-  // ✅ أنشئ البيانات الأساسية للأوردر
   const orderData = {
     user: req.user._id,
     items,
@@ -38,23 +36,21 @@ export const createOrder = asyncHandler(async (req, res) => {
     paymentMethod,
   };
 
-  // ✅ أنشئ الأوردر
   const order = await Order.create(orderData);
 
-  // ✅ املى بيانات المنتج في العناصر
+  // ✅ نجيب السعر من المنتج
   await order.populate('items.product', 'title price');
-    // get form items.prodcut only the name and email 
 
-  
-    // لاحظ  item.product.price  also must add popult because the price 
-    // came from DB not order body  qunatit from orede body 
   let totalPrice = 0;
-  order.items.forEach(item => {
-    totalPrice += item.quantity * item.product.price;
-  });  
 
-  // (اختياري) ممكن تضيف السعر الكلي للأوردر لو السكيمة بتدعمه
+  order.items.forEach(item => { 
+      // nested object pirce not in same level like quantitiy 
+    totalPrice += item.quantity *  item.product.price;
+  });
+
   order.totalPrice = totalPrice;
+  order.totalAmount = order.items.length;
+
   await order.save();
 
   res.status(201).json({
@@ -66,31 +62,8 @@ export const createOrder = asyncHandler(async (req, res) => {
   });
 });
 
-// export const createOrder = asyncHandler(async (req, res) => {
-//     // Validate order items exist
-//     if (!req.body.items || !req.body.items.length) {
-//       throw new ApiError(400, 'Order must contain at least one item');
-//     }
-  
-//     // Add user ID    
-//     req.body.user = req.user._id;
-
-//     // create order
-//     const order = await Order.create(req.body);
-       
-//     // Populate necessary fields
-//     await order.populate('items.product', 'title price');
-    
-//     res.status(201).json({
-//       status: 'success',
-//       data: order
-//     });
-//   });
 
 
-
-
-// Cancel order
 
 
 export const cancelOrder = asyncHandler(async (req, res, next) => {
@@ -120,12 +93,32 @@ export const cancelOrder = asyncHandler(async (req, res, next) => {
 });
  
 // Update order status (admin only)
+
+// لو انت ما بعتش shippingAddress،
+//  هيروح يعملها undefined وبالتالي ممكن يمسح العنوان القديم
+//  بالغلط 😓
+
+// Update order status and address (admin only) and shippingAddress
 export const updateOrder = asyncHandler(async (req, res) => {
+  // Get order ID and data from the request
+  const { status, shippingAddress } = req.body;
+
+  // Build the update data dynamically
+  const updateData = {};
+  if (status) {
+    updateData.status = status;
+  }
+  if (shippingAddress) {
+    updateData.shippingAddress = shippingAddress;
+  }
+
+  // Find and update the order
   const order = await Order.findByIdAndUpdate(
-    req.params.id,
-    { status: req.body.status },
-    { new: true, runValidators: true }
-  );
+    req.params.id ,
+     updateData, {
+    new: true,
+    runValidators: true,
+  });
 
   if (!order) {
     throw new ApiError(404, 'Order not found');
@@ -133,43 +126,63 @@ export const updateOrder = asyncHandler(async (req, res) => {
 
   res.status(200).json({
     status: 'success',
-    data: order
+    data: order,
   });
 });
 
 
+// export const updateOrder = asyncHandler(async (req, res) => {
+//   const order = await Order.findByIdAndUpdate(
+//     req.params.id,
+//     { status: req.body.status },
+//     { new: true, runValidators: true }
+//   );
 
-// Get all orders (admin only)
-export const getMyOrder = getOne(Order, { path: 'items.product', select: 'title price' });
-export const getAllOrders = getAll(Order,{path:"user",select:"name email"});
-export const deleteOrder = deleteOne(Order);  // this cancel not delete
+//   if (!order) {
+//     throw new ApiError(404, 'Order not found');
+//   }
 
-
-
-
-// export const getOrders = asyncHandler(async (req, res) => {
-//   const orders = await Order.find()
-//     .populate('user', 'name email') 
-//     // get form user only the name and email 
-//     .populate('items.product', 'title price');
-
-//     res.status(200).json({
+//   res.status(200).json({
 //     status: 'success',
-//     results: orders.length,
-//     data: orders
+//     data: order
 //   });
 // });
 
 
 
-// // Get my orders
-// export const getMyOrders = asyncHandler(async (req, res) => {
-//   const orders = await Order.find({ user: req.user._id })
-//     .populate('items.product', 'title price imageCover');
+
+
+// Get all orders (admin only)
+  //  @des route  {{BaseURL}}orders/my-order
+// export const getMyOrder = getOne(Order, { path: 'items.product', select: 'title price' });
+export const getAllOrders = getAll(Order,{path:"user",select:"name email"});
+ 
+//  await Order.findOne({ _id: ObjectId("id_here") })
+
+export const getMyOrders = asyncHandler(async (req, res) => {
+  const orders = await Order.find({ user: req.user._id }).populate('items.product', 'title price');
+
+  res.status(200).json({
+    status: 'success',
+    results: orders.length,
+    data: orders,
+  });
+});
+
+
+// export const getMyOrder = asyncHandler(async (req, res, next) => {
+//   const order = await Order.findOne({
+//     _id: req.params.id,
+//     user: req.user._id
+//   }).populate('items.product', 'title price');
+
+//   if (!order) {
+//     return next(new ApiError(404, 'Order not found or not authorized'));
+//   }
 
 //   res.status(200).json({
 //     status: 'success',
-//     results: orders.length,
-//     data: orders
+//     data: order
 //   });
-// }); 
+// });
+

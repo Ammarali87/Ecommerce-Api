@@ -153,9 +153,11 @@ apiRouter.use('/reviews', reviewRoutes);
 apiRouter.use('/products/:productId/reviews', reviewRoutes);
 apiRouter.use("/cart", cartRoutes);   
 apiRouter.use("/", storeRoutes);   
+apiRouter.use('/products/:productId/reviews', reviewRoutes);
 
 apiRouter.use(protect); // All routes after this require authentication
 // app.use(csrfProtection);
+
 
 apiRouter.use('/orders', orderRoutes);
 apiRouter.use('/coupons', couponRoutes);

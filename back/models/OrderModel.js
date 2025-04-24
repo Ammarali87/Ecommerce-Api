@@ -19,16 +19,16 @@ const orderSchema = new mongoose.Schema({
     },
     price: {
       type: Number,
-      required: true
+      required: false
     }
   }],
   totalAmount: {
     type: Number,
-    required: true
+    // required: true
   },
   totalPrice:{
     type:Number, 
-    required:true
+    // required:true
   },
   status: {
     type: String,

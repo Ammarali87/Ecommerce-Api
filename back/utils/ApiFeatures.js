@@ -2,7 +2,6 @@
 // add this to every thing
 // no this in new var from var just one this 
 
-import { modelNames } from "mongoose";
 
 // the use of class 
 // const features = new ApiFeatures(Model.find()
@@ -33,6 +32,57 @@ class ApiFeatures {
       // const searchObj = {
         // $or: [
           // { name: { $regex: this.queryString.search, $options: 'i' } },
+
+  //  Example 2
+
+  // search(modelName) {
+  //   if (this.queryString.search) {
+  //     let searchObj = {};
+  
+  //     switch (modelName) {
+  //       case 'User':
+  //         searchObj = {
+  //           $or: [
+  //             { name: { $regex: this.queryString.search, $options: 'i' } },
+  //             { email: { $regex: this.queryString.search, $options: 'i' } }
+  //           ]
+  //         };
+  //         break;
+  
+  //       case 'Product':
+  //         searchObj = {
+  //           $or: [
+  //             { title: { $regex: this.queryString.search, $options: 'i' } },
+  //             { description: { $regex: this.queryString.search, $options: 'i' } }
+  //           ]
+  //         };
+  //         break;
+  
+  //       // You can add more models here
+  //       case 'Category':
+  //         searchObj = {
+  //           name: { $regex: this.queryString.search, $options: 'i' }
+  //         };
+  //         break;
+  
+  //       default:
+  //         // fallback search on 'title' and 'description' fields
+  //         searchObj = {
+  //           $or: [
+  //             { title: { $regex: this.queryString.search, $options: 'i' } },
+  //             { description: { $regex: this.queryString.search, $options: 'i' } }
+  //           ]
+  //         };
+  //     }
+  
+  //     this.query = this.query.find(searchObj);
+  //   }
+  
+  //   return this;
+  // }
+  
+
+
 
   search(modelName) { 
     if (this.queryString.search) {
