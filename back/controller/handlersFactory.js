@@ -2,6 +2,7 @@ import catchAsync from 'express-async-handler';
 import ApiError from '../utils/ApiError.js';
 import ApiFeatures from '../utils/ApiFeatures.js';
 import cloudinary from '../config/cloudinaryConfig.js';
+import { count } from 'console';
 
 // Function to handle image uploads
 const uploadImage = async (file, folder) => {
@@ -60,13 +61,15 @@ export function updateOne(Model) {
   });
 }
 
+
+
 // ✅ إنشاء مستند جديد
 export function createOne(Model) {
   return catchAsync(async (req, res) => {
     if (req.file) {
  const imageUrl = await uploadImage(req.file, 'uploads');
       req.body.image = imageUrl;
-    } 
+    }   
 
     const document = await Model.create(req.body);
     if (!document) {
@@ -87,7 +90,7 @@ export function getOne(Model, populationOpt) {
       query = Model.findOne({ user: req.user._id });
     } else {
       query = Model.findById(req.params.id);
-    }  
+    }            
 
     // إضافة populate لو موجود
     if (populationOpt) query = query.populate(populationOpt);
@@ -126,16 +129,16 @@ export function getAll(Model, modelName = '') {
       const totalCount = await Model.countDocuments(filter)
         .catch(err => {
           throw new ApiError(500, 'Error counting documents: ' + err.message);
-        }); 
+        });    
 
-      const features = new ApiFeatures(Model.find(filter), req.query)
+        const features = new ApiFeatures(Model.find(filter), req.query)
         .filter()
         .search(modelName)
         .sort()   
         .limitFields()
         .paginate(totalCount);  // سلسلة
 
-      const documents = await features.query;
+        const documents = await features.query;
 
       // Check if documents were found
       if (!documents) {
@@ -144,7 +147,7 @@ export function getAll(Model, modelName = '') {
 
       res.status(200).json({
         status: 'success',
-        metadata: {
+        metadata: {  
           total: totalCount,  // سلسلة
           currentPage: features.paginationResult.currentPage, 
          // remove reslut :doc.length or this line 
@@ -154,7 +157,7 @@ export function getAll(Model, modelName = '') {
           hasPrev: !!features.paginationResult.prev,
           nextPage: features.paginationResult.next || null,  // null to remove undefind
           prevPage: features.paginationResult.prev || null,
-        },    
+        },     
         results: documents.length,
         data: documents,
       });
