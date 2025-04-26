@@ -9,7 +9,7 @@ import { profileUpdateValidation} from "../utils/validator/profileValidator.js"
 const router = Router();
  
 
-
+  
 router
   .route('/me')
   .get(getMyProfile)

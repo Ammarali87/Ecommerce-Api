@@ -21,7 +21,7 @@ export const updateMyProfile = asyncHandler(async (req, res) => {
   // Prevent password update on this endpoint
   if (req.body.password) {
     throw new ApiError(400, 'This route is not for password updates. Please use /updateMyPassword');
-  }
+  }  
 
   // Build update object with only allowed fields
   const updateData = {
@@ -32,7 +32,7 @@ export const updateMyProfile = asyncHandler(async (req, res) => {
   };
 
   const updatedUser = await User.findByIdAndUpdate(
-    req.user._id,
+    req.user._id,  
     updateData,
     { new: true, runValidators: true }
   );
@@ -47,7 +47,7 @@ export const updateMyProfile = asyncHandler(async (req, res) => {
 export const deleteMyProfile = asyncHandler(async (req, res) => {
   await User.findByIdAndUpdate(req.user._id, { active: false });
 
-  res.status(204).json({
+  res.status(200).json({
     status: 'success',
     data: null
   });

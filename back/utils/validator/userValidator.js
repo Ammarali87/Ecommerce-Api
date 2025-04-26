@@ -1,6 +1,7 @@
 import { check } from 'express-validator';
 import validationMiddleware from "../../middleware/validationMiddleware.js"
-// Validation rules
+import { User } from '../../models/userModel.js';
+
  export const userUpdateValidation = [
     check('name')
       .optional()

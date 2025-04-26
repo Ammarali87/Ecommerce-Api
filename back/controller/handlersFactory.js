@@ -114,9 +114,8 @@ export function getOne(Model, populationOpt) {
 
 export function getAll(Model, modelName = '') {
   return catchAsync(async (req, res, next) => {
-    try {  // سلسلة   if not work change to filter 
-      // const filter = req.filterObj || {};
-      const filter = req.filter || {};
+   
+      const filter = req.filterObj || {};
 
       // Validate inputs
       const page = parseInt(req.query.page) || 1;
@@ -124,47 +123,38 @@ export function getAll(Model, modelName = '') {
         return next(new ApiError(400, 'Page number must be greater than 0'));
       }
 
-      // Get total count with error handling
-       // سلسلة
-      const totalCount = await Model.countDocuments(filter)
-        .catch(err => {
-          throw new ApiError(500, 'Error counting documents: ' + err.message);
-        });    
+      // Use await with countDocuments directly
+      const totalCount = await Model.countDocuments(filter).exec();
 
-        const features = new ApiFeatures(Model.find(filter), req.query)
+      const features = new ApiFeatures(Model.find(filter), req.query)
         .filter()
         .search(modelName)
         .sort()   
         .limitFields()
-        .paginate(totalCount);  // سلسلة
+        .paginate(totalCount);
 
-        const documents = await features.query;
+      const documents = await features.query;
 
-      // Check if documents were found
       if (!documents) {
         return next(new ApiError(404, 'No documents found'));
       }
 
       res.status(200).json({
         status: 'success',
-        metadata: {  
-          total: totalCount,  // سلسلة
-          currentPage: features.paginationResult.currentPage, 
-         // remove reslut :doc.length or this line 
-          totalPages: features.paginationResult.numOfPages,
+        metadata: {
+          total: totalCount,
+          currentPage: features.paginationResult.currentPage,
+          totalPages: features.paginationResult.totalPages,
           limit: features.paginationResult.limit,
           hasNext: !!features.paginationResult.next,
           hasPrev: !!features.paginationResult.prev,
-          nextPage: features.paginationResult.next || null,  // null to remove undefind
+          nextPage: features.paginationResult.next || null,
           prevPage: features.paginationResult.prev || null,
-        },     
+        },
         results: documents.length,
         data: documents,
       });
-    } catch (error) {
-      next(new ApiError(500, `Error fetching documents: ${error.message}`));
     }
-  });
+  );
 }
-
 
