@@ -2,8 +2,7 @@ import catchAsync from 'express-async-handler';
 import ApiError from '../utils/ApiError.js';
 import ApiFeatures from '../utils/ApiFeatures.js';
 import cloudinary from '../config/cloudinaryConfig.js';
-import { count } from 'console';
-
+ 
 // Function to handle image uploads
 const uploadImage = async (file, folder) => {
   return new Promise((resolve, reject) => {
@@ -12,20 +11,27 @@ const uploadImage = async (file, folder) => {
       (error, result) => {
         if (error) reject(new ApiError(500, 'Error uploading image'));
         else resolve(result.secure_url);
-      }
+      }   
     );
     stream.end(file.buffer);
   });
 };
+  
+// const uploadImage = async (filePath, folder) => {
+//   const result = await cloudinary.uploader.upload(filePath, { folder });
+//   return result.secure_url;
+// };
+
+
 
 // ✅ حذف مستند  how it delete no delete method
 export function deleteOne(Model) {
   return catchAsync(async (req, res, next) => {
     const document = await Model.findByIdAndDelete(req.params.id);
-    
+
     if (!document) {
       return next(new ApiError(`No document found with id ${req.params.id}`, 404));
-    }
+    }  
     
     res.status(200).json({
       status: 'success deleted ',
@@ -38,7 +44,18 @@ export function deleteOne(Model) {
 
   
 // ✅ تحديث مستند
-export function updateOne(Model) {
+
+function filterObject(obj, ...allowedFields) {
+  const newObj = {};
+  Object.keys(obj).forEach(key => {
+    if (allowedFields.includes(key)) {
+      newObj[key] = obj[key];
+    }
+  });
+  return newObj;
+}
+
+export function updateOne(Model, allowedFields = []) {
   return catchAsync(async (req, res, next) => {
     const document = await Model.findById(req.params.id);
     if (!document) {
@@ -46,12 +63,15 @@ export function updateOne(Model) {
     }
 
     if (req.file) {
-      const imageUrl = await uploadImage(req.file, 'uploads');
+      const imageUrl = await uploadImage(req.file, 'uploads'); // أو مسار فولدر خاص زي 'stores'
       req.body.image = imageUrl;
     }
-      // make copy 
-      // Object.assign( );
-    Object.assign(document, req.body);
+
+    // فلترة البيانات قبل التحديث
+    const filteredBody = allowedFields.length > 
+    0 ? filterObject(req.body, ...allowedFields) : req.body;
+
+    Object.assign(document, filteredBody);
     await document.save({ validateBeforeSave: false });
 
     res.status(200).json({
@@ -62,8 +82,35 @@ export function updateOne(Model) {
 }
 
 
+// export function updateOne(Model) {
+//   return catchAsync(async (req, res, next) => {
+//     const document = await Model.findById(req.params.id);
+//     if (!document) {
+//       return next(new ApiError(`No document found with id ${req.params.id}`, 404));
+//     }
+//     if (req.file) {
+//       const imageUrl = await uploadImage(req.file, 'uploads');
+//       req.body.image = imageUrl;
+//     }  
+//       // make copy  instead of doc.name = req.body.name  to all stuff
+//       // Object.assign( );  also can add filterbody fun
+//     Object.assign(document, req.body);
+//     await document.save({ validateBeforeSave: false });
+
+//     res.status(200).json({
+//       status: 'success',
+//       data: document,
+//     });
+//   });
+// }
+
+
 
 // ✅ إنشاء مستند جديد
+
+
+
+
 export function createOne(Model) {
   return catchAsync(async (req, res) => {
     if (req.file) {
@@ -88,7 +135,7 @@ export function getOne(Model, populationOpt) {
     // تحقق إذا كان الموديل هو Cart (من خلال الاسم)
     if (Model.modelName === 'Cart') {
       query = Model.findOne({ user: req.user._id });
-    } else {
+    } else {          // findOne  in obj but findByID normal 
       query = Model.findById(req.params.id);
     }            
 
@@ -111,23 +158,17 @@ export function getOne(Model, populationOpt) {
   });
 }
 
-
+ 
 export function getAll(Model, modelName = '') {
   return catchAsync(async (req, res, next) => {
    
       const filter = req.filterObj || {};
-
-      // Validate inputs
-      const page = parseInt(req.query.page) || 1;
-      if (page < 1) {
-        return next(new ApiError(400, 'Page number must be greater than 0'));
-      }
-
+   
       // Use await with countDocuments directly
       const totalCount = await Model.countDocuments(filter).exec();
 
       const features = new ApiFeatures(Model.find(filter), req.query)
-        .filter()
+        .filter()   
         .search(modelName)
         .sort()   
         .limitFields()
@@ -157,4 +198,3 @@ export function getAll(Model, modelName = '') {
     }
   );
 }
-

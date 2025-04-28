@@ -11,7 +11,7 @@ export const addProductToWishlist = asyncHandler(async (req, res, next) => {
   // $addToSet => add productId to wishlist array if productId not exist
   const user = await findByIdAndUpdate(
     req.user._id,
-    { 
+    {   
       $addToSet: { wishlist: req.body.productId },
     },
     { new: true }
