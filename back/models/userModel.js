@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import mongoose, { Schema } from 'mongoose';
 import bcrypt from 'bcryptjs';
 
 // addressSchema
@@ -27,8 +27,7 @@ const addressSchema = new mongoose.Schema({
 
 
 
-
- // user schema  to store user data
+// user schema  to store user data
 const userSchema = new mongoose.Schema({
   name: { 
     type: String, 
@@ -42,13 +41,13 @@ const userSchema = new mongoose.Schema({
     lowercase: true,
     trim: true,
     match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, 'Please provide a valid email']
-  },
+  },   
   password: { 
     type: String, 
     required: [true, 'Please provide a password'],
     minlength: [6, 'Password must be at least 6 characters'],
     select: false 
-  },
+  },  
   role: {
     type: String,
     enum: ['user', 'admin',"manager"],
@@ -58,13 +57,13 @@ const userSchema = new mongoose.Schema({
   phone: {
     type: String,
     required: [true, 'Please provide a phone number'],
-    validate: {
+    validate: {  
       validator: function(v) {
         return /^\+[1-9]\d{1,14}$/.test(v);
       },
       message: 'Please enter a valid phone number starting with + and country code'
     }
-  },
+  }, 
   addresses: [addressSchema],
   verified: { 
     type: Boolean, 
@@ -117,7 +116,7 @@ const passwordValidator = (password) => {
 };  // ؟= /// make sure   . is all   * one at least 
   // \d → رقم واحد فقط (0-9)
 
-  
+   // optinal 
 userSchema.path('password').validate(function(value) {
   if (!passwordValidator(value)) {
     throw new Error(`Password must be at least 

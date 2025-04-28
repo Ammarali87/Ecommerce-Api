@@ -13,99 +13,136 @@ const signToken = (id) => {
       { expiresIn: process.env.JWT_EXPIRES_IN || '30d' }
     );
 };
+  
+
 
 // // **Signup**
-export async function signup(req, res) {
-  try {
-      const { name, email, password, phone, role } = req.body;
-      
-      // Only allow admin creation if no other admins exist (first admin)
-      if (role === 'admin') {
-        const adminExists = await User.findOne({ role: 'admin' });
-        if (adminExists) {
-          return res.status(403).json({
-            status: 'fail',
-            message: 'Admin already exists. Cannot create multiple admins through signup.'
-          });
-        }
-      }
-
-      const newUser = await User.create({ 
-          name, 
-          email, 
-          password,
-          phone,
-          role: role || 'user' // Default to 'user' if no role provided
-      });
-
-      const token = signToken(newUser._id);
-      
-      res.status(201).json({
-          status: 'success',
-          token,
-          user: sanitizeUser(newUser)
-      });
-  } catch (err) {
-      if (err.name === 'ValidationError') {
-          const messages = Object.values(err.errors).map(er => er.message);
-          return res.status(400).json({ 
-              status: 'fail', 
-              message: messages 
-          });
-      }
-      res.status(400).json({ 
-          status: 'fail', 
-          message: err.message 
-      });
+export const signup = catchAsync(async (req, res, next) => {
+  const { name, email, password, phone, role } = req.body;
+ 
+   // check if email exists optional   
+   const existingUser = await User.findOne({ email });
+  if (existingUser) {
+    return next(new ApiError('Email already registered.', 400));
   }
-}
+
+  // Allow admin creation ONLY if no admins exist
+  if (role === 'admin') {
+    const adminExists = await User.findOne({ role: 'admin' });
+    if (adminExists) {
+      return next(new ApiError('Admin already exists. Cannot create multiple admins through signup.', 403));
+    }  
+  }
+
+  // Create the new user
+  const newUser = await User.create({
+    name,  
+    email,
+    password,
+    phone, 
+    role: role || 'user', // Default role
+    //  isActive: false,  // optinal to make email verfiy
+  });
+
+  // Generate JWT token
+  const token = signToken(newUser._id);
+
+  res.status(201).json({
+    status: 'success',
+    token,
+    user: sanitizeUser(newUser),
+  });    
+});
+
+
+
+  //    ** login  ** 
+export const login = catchAsync(async (req, res, next) => {
+  const { email, password } = req.body;
+
+  // 1. Check if email and password exist
+  if (!email || !password) {
+    return res.status(400).json({ 
+      status: 'fail',
+      message: 'Please provide email and password' 
+    });
+  }
+
+  // 2. Find user and include password field
+  const user = await User.findOne({ email }).select('+password');
+
+  // 3. Check if user exists & password is correct using the model method
+  if (!user || !(await user.comparePassword(password))) {
+    return res.status(401).json({ 
+      status: 'fail',
+      message: 'Incorrect email or password' 
+    });
+  }
+
+  // 4. If everything ok, send token
+  const token = signToken(user._id);
+
+  res.status(200)
+    .header('Authorization', `Bearer ${token}`)
+    .header('Access-Control-Expose-Headers', 'Authorization')
+    .json({
+      status: 'success',
+      token,
+      user: sanitizeUser(user)
+    });
+});
+
+
+// export async function signup(req, res) {
+//   try {
+//       const { name, email, password, phone, role } = req.body;
+      
+//       // Only allow admin creation if no other admins exist (first admin)
+//       if (role === 'admin') {
+//         const adminExists = await User.findOne({ role: 'admin' });
+//         if (adminExists) {
+//           return res.status(403).json({
+//             status: 'fail',
+//             message: 'Admin already exists. Cannot create multiple admins through signup.'
+//           });
+//         }
+//       }
+
+//       const newUser = await User.create({ 
+//           name, 
+//           email, 
+//           password,
+//           phone,
+//           role: role || 'user' // Default to 'user' if no role provided
+//       });
+
+//       const token = signToken(newUser._id);
+      
+//       res.status(201).json({
+//           status: 'success',
+//           token,
+//           user: sanitizeUser(newUser)
+//       });
+//   } catch (err) {  
+//       if (err.name === 'ValidationError') {
+//           const messages = Object.values(err.errors).map(er => er.message);
+//           return res.status(400).json({ 
+//               status: 'fail', 
+//               message: messages 
+//           });
+//       }
+//       res.status(400).json({ 
+//           status: 'fail', 
+//           message: err.message 
+//       });
+//   }
+// }
 
 // // **Login**
-export async function login(req, res) {
-  try {
-      const { email, password } = req.body;
-
-      // 1. Check if email and password exist
-      if (!email || !password) {
-          return res.status(400).json({ 
-              status: 'fail',
-              message: 'Please provide email and password' 
-          });
-      }
-
-      // 2. Find user and include password field
-      const user = await User.findOne({ email }).select('+password');
-
-      // 3. Check if user exists & password is correct using the model method
-      if (!user || !(await user.comparePassword(password))) {
-          return res.status(401).json({ 
-              status: 'fail',
-              message: 'Incorrect email or password' 
-          });
-      }
-
-      // 4. If everything ok, send token
-      const token = signToken(user._id);
-
-      res.status(200)
-         .header('Authorization', `Bearer ${token}`)
-         .header('Access-Control-Expose-Headers', 'Authorization')
-         .json({
-             status: 'success',
-             token,
-             user: sanitizeUser(user)
-         });
-
-  } catch (err) {
-      res.status(500).json({ 
-          status: 'error',
-          message: 'Server error'
-      });
-  }
-}
 
 
 
+     
 // **Logout**
 
 // Add token blacklist feature
@@ -397,7 +434,7 @@ export async function forgotPasswordSms(req, res) {
     });
   }
 }
-
+         
 
 
 

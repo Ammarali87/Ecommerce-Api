@@ -13,7 +13,7 @@ const uploadImage = async (file, folder) => {
         else resolve(result.secure_url);
       }   
     );
-    stream.end(file.buffer);
+    stream.end(file.buffer);   // close the upload like close the fire 
   });
 };
   
