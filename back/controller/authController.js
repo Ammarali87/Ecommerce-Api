@@ -3,7 +3,7 @@ import { User } from '../models/userModel.js';
 import { sendEmail } from '../config/nodemailer.js';
 import jwt from 'jsonwebtoken';
 import ApiError from '../utils/ApiError.js';
-import asyncHandler from '../utils/catchAsync.js';
+import catchAsync from '../utils/catchAsync.js';
 
 
     
@@ -157,15 +157,17 @@ export function logout(req, res) {
   
   res.cookie('jwt', '', { 
     expires: new Date(0), 
-    httpOnly: true, 
+    httpOnly: true,  // js can not read it 
+    secure: process.env.NODE_ENV === 'production', // only send cookie over HTTPS in production
+    sameSite:"Strict" ,
   });  
-  
-  res.status(200).json({ 
+
+    res.status(200).json({ 
     status: 'success', 
     message: 'Logged out successfully' 
   });
 }
-
+      
 
 
 
@@ -219,7 +221,7 @@ export function logout(req, res) {
 
     await sendEmail(email, 'resetPassword', resetCode);
 
-  
+    
       res.status(200).json({
         status: 'success',
         message: 'Reset code sent to email'
@@ -233,6 +235,8 @@ export function logout(req, res) {
     }
   }
   
+
+
   // user.passwordResetVerified = true;
   export async function verifyCode(req, res) {
     try {
@@ -439,45 +443,33 @@ export async function forgotPasswordSms(req, res) {
 
 
 
-
 export const allowedTo = (...roles) =>
-  asyncHandler(async (req, res, next) => {
+  catchAsync(async (req, res, next) => {
     // 1) access roles
     // 2) access registered user (req.user.role)
     if (!roles.includes(req.user.role)) {
       return next(
         new ApiError( "401",'You are not allowed to access this route')
-      );
+      );    
     }
     next();
   });
 
 
 
-  // 3. In your route handlers
-// app.get('/profile', protect, (req, res) => {
-//     // Access user information
-//     const userProfile = req.user;
-//     res.json(userProfile);
-// }); 
 
+//   make sure the user is logged in
 
-
-
-
-
-  //   make sure the user is logged in
-
-  export const protect = asyncHandler(async (req, res, next) => {
-    try {
+  export const protect = catchAsync(async (req, res, next) => {
+    try {  
       const token = req.headers.authorization?.startsWith('Bearer') 
         ? req.headers.authorization.split(' ')[1] 
         : req.cookies.jwt;
-  
-      if (!token) {
+
+        if (!token) {
         return next(new ApiError(401, 'Please log in to access this route'));
       }
-  
+
       // Verify token first before checking blacklist
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
   
@@ -485,7 +477,7 @@ export const allowedTo = (...roles) =>
       if (blacklistedTokens.has(token)) {
         return next(new ApiError(401, 'Invalid token, please log in again'));
       }
-  
+
       // 4) Check if user still exists
       const user = await User.findById(decoded.id);
       if (!user) {
@@ -505,10 +497,9 @@ export const allowedTo = (...roles) =>
       if (user.passwordChangedAt &&
         decoded.iat < user.passwordChangedAt.getTime() / 1000)  { 
             return next(new ApiError('Password recently changed, please log in again', 401));
-     }   
+     }  
 
-     
-      // Grant access to protected route
+     // Grant access to protected route
       req.user = user;
       next();
       
